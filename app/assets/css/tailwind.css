@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply text-gray-900 bg-gray-50 antialiased;
+    }
+}
+
+/* ── Page Transition: fade-left ─────────────────────────── */
+.fade-left-enter-active {
+    transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.fade-left-leave-active {
+    transition: opacity 120ms ease, transform 120ms ease;
+}
+
+/* Entra: vem da esquerda */
+.fade-left-enter-from {
+    opacity: 0;
+    transform: translateX(-18px);
+}
+
+.fade-left-enter-to {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Sai: some no lugar, sem mover (mais limpo) */
+.fade-left-leave-from {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.fade-left-leave-to {
+    opacity: 0;
+    transform: translateX(8px);
+}

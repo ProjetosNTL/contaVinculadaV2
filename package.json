@@ -1,0 +1,40 @@
+{
+  "name": "contaVinculadaNuxt4",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxtjs/color-mode": "^4.0.0",
+    "@tsparticles/vue3": "^3.0.1",
+    "@vueuse/core": "^14.2.1",
+    "@vueuse/nuxt": "^14.2.1",
+    "apexcharts": "^5.6.0",
+    "axios": "^1.13.5",
+    "dotenv": "^17.3.1",
+    "maska": "^3.2.0",
+    "mssql": "^12.2.0",
+    "nodemailer": "^8.0.1",
+    "nuxt": "^4.3.1",
+    "tsparticles": "^3.9.1",
+    "tsparticles-slim": "^2.12.0",
+    "vue": "^3.5.29",
+    "vue-router": "^4.6.4",
+    "vue3-apexcharts": "^1.10.0"
+  },
+  "devDependencies": {
+    "@iconify-json/fa7-solid": "^1.2.4",
+    "@nuxt/icon": "^2.2.1",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@types/mssql": "^9.1.9",
+    "@vueuse/motion": "^3.0.3",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.2.5"
+  }
+}
