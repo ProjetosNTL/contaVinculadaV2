@@ -218,7 +218,7 @@ const clearForm = () => {
 const save = async () => {
   loadingSave.value = true
   try {
-    const data = await $fetch<any>('/api/cadastro/funcionario/grava', { method: 'POST', body: form })
+    const data = await $fetch<any>('/api/cadastro/funcionario/gravar', { method: 'POST', body: form })
     if (data.status === 'success') {
       alert('Operação realizada com sucesso!')
       navigateTo('/cadastro/funcionario')

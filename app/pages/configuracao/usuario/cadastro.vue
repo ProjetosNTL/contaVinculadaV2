@@ -331,7 +331,7 @@ const save = async () => {
 
   loadingSave.value = true
   try {
-    const data = await $fetch('/api/configuracao/usuario/grava', {
+    const data = await $fetch('/api/configuracao/usuario/gravar', {
       method: 'POST',
       body: form
     })
