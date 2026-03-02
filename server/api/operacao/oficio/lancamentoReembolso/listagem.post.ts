@@ -1,0 +1,64 @@
+import { defineEventHandler, readBody } from 'h3'
+import { useDb } from '../../../../utils/db'
+
+export default defineEventHandler(async (event) => {
+  const body = await readBody(event)
+  const req = (await useDb()).request()
+  
+  let query = `
+    SELECT DISTINCT 
+      LR.codigo, P.codigo AS codigoProjeto, P.descricao AS projeto, 
+      TM.descricao AS tipoMovimentacao, LR.dataMovimentacao, LR.valorMovimentacao, 
+      LR.dataCadastro, U.login AS usuarioCadastro, 
+      CONCAT(C.agencia,'/',C.conta,' - ',B.nomeBanco) AS contaVinculada, 
+      CASE WHEN EXISTS(SELECT codigo FROM operacao.lancamentoReembolsoFuncionario WHERE lancamentoReembolso = LR.codigo) THEN 1 ELSE 0 END AS funcionario,
+      LR.dataOficio, LR.valorOficio, LR.dataResposta, LR.dataEntrada, S.descricao AS status
+    FROM operacao.lancamentoReembolso LR
+    LEFT JOIN cadastro.projeto P ON P.codigo = LR.projeto
+    LEFT JOIN tabelaBasica.tipoMovimentacao TM ON TM.codigo = LR.tipoMovimentacao
+    LEFT JOIN configuracao.usuario U ON U.codigo = LR.usuarioCadastro
+    LEFT JOIN cadastro.projetoContaVinculada C ON C.codigo = LR.contaVinculada
+    LEFT JOIN tabelaBasica.banco B ON B.codigo = C.banco
+    LEFT JOIN tabelaBasica.status S ON S.codigo = LR.status
+    WHERE (0=0)
+  `
+
+  if (body.projeto) {
+    req.input('projeto', parseInt(body.projeto))
+    query += ` AND LR.projeto = @projeto `
+  }
+  if (body.tipoMovimentacao) {
+    req.input('tipo', parseInt(body.tipoMovimentacao))
+    query += ` AND LR.tipoMovimentacao = @tipo `
+  }
+  if (body.dataMovimentacao) {
+    const [d, m, y] = body.dataMovimentacao.split('/')
+    req.input('dataMov', `${y}-${m}-${d}`)
+    query += ` AND LR.dataMovimentacao = @dataMov `
+  }
+
+  query += ` ORDER BY LR.codigo DESC`
+
+  try {
+    const result = await req.query(query)
+
+    const dataFormatada = result.recordset.map((row: any) => {
+      const formatar = (dataSql: any) => {
+        if(!dataSql) return ''
+        const d = new Date(dataSql)
+        return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`
+      }
+
+      row.dataMovimentacao = formatar(row.dataMovimentacao)
+      row.dataOficio = formatar(row.dataOficio)
+      row.dataResposta = formatar(row.dataResposta)
+      row.dataEntrada = formatar(row.dataEntrada)
+      return row
+    })
+
+    return { status: 'success', data: dataFormatada }
+  } catch (erro) {
+    console.error('Erro ao listar reembolsos:', erro)
+    return { status: 'failed', message: 'Erro ao buscar no banco de dados.' }
+  }
+})
