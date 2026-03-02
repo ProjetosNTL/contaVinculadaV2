@@ -1,0 +1,26 @@
+import { defineEventHandler, readBody } from 'h3'
+import { useDb } from '../../../../utils/db'
+import crypto from 'crypto' 
+
+export default defineEventHandler(async (event) => {
+  const body = await readBody(event)
+  const { pin } = body
+  const usuarioLogadoId = 1
+
+  if (!pin) return { status: 'failed' }
+
+  const pinCripto = crypto.createHash('md5').update(pin).digest('hex')
+
+  try {
+    const pool = await useDb()
+    const query = `SELECT codigo FROM configuracao.usuario WHERE pin = '${pinCripto}' AND codigo = ${usuarioLogadoId}`
+    const result = await pool.request().query(query)
+
+    if (result.recordset.length > 0) return { status: 'success' }
+    
+    return { status: 'failed' }
+  } catch (erro) {
+    console.error('Erro ao validar PIN:', erro)
+    return { status: 'failed' }
+  }
+})
