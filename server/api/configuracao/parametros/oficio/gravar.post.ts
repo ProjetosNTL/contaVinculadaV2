@@ -29,7 +29,6 @@ export default defineEventHandler(async (event) => {
       saldoOficio = 1
     }
 
-    // Grava via Procedure
     const queryExec = `EXEC configuracao.parametroOficio_Atualiza ${codigo}, ${projeto}, NULL, ${saldoOficio}, '${texto}', ${usuarioLogado}`
     await pool.request().query(queryExec)
 
