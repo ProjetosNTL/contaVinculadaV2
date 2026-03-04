@@ -61,6 +61,11 @@
       <div v-if="!collapsed" class="menu-header mt-2">Ajustes</div>
       <div v-else class="menu-divider"></div>
 
+      <NuxtLink to="/tabelaBasica" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Tabelas Básicas' : ''">
+        <Icon name="fa7-solid:database" class="menu-icon" />
+        <span v-if="!collapsed" class="menu-text">Tabelas Básicas</span>
+      </NuxtLink>
+
       <NuxtLink to="/configuracao/usuario" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Usuários' : ''">
         <Icon name="fa7-solid:user-shield" class="menu-icon" />
         <span v-if="!collapsed" class="menu-text">Usuários</span>

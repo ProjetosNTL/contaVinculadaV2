@@ -15,7 +15,20 @@
       </div>
     </div>
 
-    <div class="flex items-center">
+    <div class="flex items-center gap-3 md:gap-5">
+      
+      <Transition name="slide-fade">
+        <div v-if="!isHome" class="hidden md:flex items-center gap-4">
+          <div class="flex items-center gap-3 bg-white dark:bg-[#1e2029] border border-gray-200 dark:border-gray-700/80 px-4 py-1.5 rounded-full shadow-sm">
+            <Icon name="fa7-solid:clock" class="text-emerald-500 dark:text-emerald-400 w-4 h-4" />
+            <div class="flex flex-col items-center justify-center leading-none mt-0.5">
+              <span class="font-extrabold text-gray-800 dark:text-white text-[15px] tabular-nums tracking-wide leading-none mb-1">{{ horaAtual }}</span>
+              <span class="text-[9px] text-gray-500 dark:text-gray-400 uppercase tracking-[0.15em] font-bold leading-none">{{ dataAtual }}</span>
+            </div>
+          </div>
+          <div class="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
+        </div>
+      </Transition>
       
       <div class="relative" @blur="menuOpen = false" tabindex="0">
         <button @click="menuOpen = !menuOpen" class="flex items-center gap-3 p-1 pr-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600 rounded-full transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
@@ -50,19 +63,46 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useCookie } from '#app'
 
 const router = useRouter()
+const route = useRoute()
+
+// Verifica se estamos na raiz (Home)
+const isHome = computed(() => route.path === '/')
+
 const userName = ref('Usuário')
 const menuOpen = ref(false)
+
+// Lógica de tempo para o relógio da Navbar
+const horaAtual = ref('')
+const dataAtual = ref('')
+let timer: ReturnType<typeof setInterval>
+
+const updateTime = () => {
+  const now = new Date()
+  
+  // Hora formato 10:48
+  horaAtual.value = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  
+  // Data formato QUA, 04 DE MAR.
+  const diaSemana = now.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').toUpperCase()
+  const dia = String(now.getDate()).padStart(2, '0')
+  const mes = now.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase()
+  
+  dataAtual.value = `${diaSemana}, ${dia} DE ${mes}.`
+}
 
 const userInitial = computed(() => {
   return userName.value.charAt(0).toUpperCase()
 })
 
 onMounted(() => {
+  updateTime()
+  timer = setInterval(updateTime, 1000)
+
   if (process.client) {
     try {
       const userRaw = localStorage.getItem('user')
@@ -73,6 +113,10 @@ onMounted(() => {
       }
     } catch {}
   }
+})
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
 })
 
 const logout = () => {
