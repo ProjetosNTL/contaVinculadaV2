@@ -4,6 +4,7 @@ export function useFuncionarioListagem() {
   const carregandoTela = ref(false)
   const buscaRealizada = ref(false)
   const listaRegistros = ref<any[]>([])
+  const visaoAtual = ref<'lista' | 'cards'>('lista')
 
   const filtro = reactive({
     nomeParam: '',
@@ -79,6 +80,14 @@ export function useFuncionarioListagem() {
     }
   }
 
+  const abrirModalFiltroAvancado = () => {
+    console.log('Abrindo modal de Filtro Avançado...')
+  }
+
+  const abrirModalExibicao = () => {
+    console.log('Abrindo modal de Controle de Exibição...')
+  }
+
   return {
     carregandoTela,
     buscaRealizada,
@@ -91,6 +100,9 @@ export function useFuncionarioListagem() {
     selecionarSugestao,
     fecharSugestoesDelay,
     destacarTexto,
-    buscarLista
+    buscarLista,
+    visaoAtual,
+    abrirModalFiltroAvancado,
+    abrirModalExibicao
   }
 }

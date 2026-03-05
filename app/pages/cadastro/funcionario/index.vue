@@ -18,83 +18,93 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
-      <div class="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-gray-800 pb-4">
-        <div class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center border border-gray-200 dark:border-gray-700 shrink-0">
-          <Icon name="fa7-solid:filter" class="text-gray-500 dark:text-gray-400 w-4 h-4" />
-        </div>
-        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200">Filtros de Pesquisa</h3>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
-        <div class="lg:col-span-2 relative">
-          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Nome Completo</label>
-          <div class="relative">
+    <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm flex flex-col gap-5 mb-2">
+      
+      <div class="flex flex-col xl:flex-row items-center justify-between gap-4">
+        
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-1/2">
+          
+          <div class="relative w-full sm:flex-1">
+            <Icon name="fa7-solid:magnifying-glass" class="absolute left-4 top-3.5 text-gray-400 w-4 h-4 z-10" />
             <input 
               v-model="filtro.nomeParam" 
               @input="buscarSugestoesNome"
               @focus="buscarSugestoesNome"
               @blur="fecharSugestoesDelay"
+              @keyup.enter="buscarLista"
               type="text" 
-              class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl px-4 py-3 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400" 
-              placeholder="Buscar por nome..." 
+              class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl pl-11 pr-4 py-3 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400" 
+              placeholder="Digite o nome do funcionário..." 
               autocomplete="off"
             />
-            <Icon v-if="buscandoSugestoes" name="fa7-solid:spinner" class="animate-spin absolute right-4 top-3.5 text-emerald-500 w-5 h-5" />
+            <Icon v-if="buscandoSugestoes" name="fa7-solid:spinner" class="animate-spin absolute right-4 top-3.5 text-emerald-500 w-4 h-4" />
+
+            <Transition name="dropdown">
+              <div v-if="mostrandoSugestoes" class="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/80 rounded-xl shadow-2xl max-h-64 overflow-y-auto scrollbar-custom backdrop-blur-xl">
+                <ul v-if="sugestoesNome.length > 0" class="py-1.5">
+                  <li 
+                    v-for="sugestao in sugestoesNome" 
+                    :key="sugestao.id" 
+                    @mousedown.prevent="selecionarSugestao(sugestao)"
+                    class="flex items-center gap-3 px-5 py-3 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 cursor-pointer transition-all border-b border-gray-50 dark:border-gray-800/50 last:border-0 group"
+                  >
+                    <Icon name="fa7-solid:magnifying-glass" class="w-3.5 h-3.5 text-gray-400 group-hover:text-emerald-500 transition-colors shrink-0" />
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400" v-html="destacarTexto(sugestao.descricao, filtro.nomeParam)"></span>
+                  </li>
+                </ul>
+                <div v-else-if="!buscandoSugestoes && filtro.nomeParam.length >= 3" class="p-6 text-center flex flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400">
+                  <span class="text-sm">Nenhum nome encontrado.</span>
+                </div>
+              </div>
+            </Transition>
           </div>
 
-          <Transition name="dropdown">
-            <div v-if="mostrandoSugestoes" class="absolute z-50 w-full mt-2 bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/80 rounded-xl shadow-2xl max-h-64 overflow-y-auto scrollbar-custom backdrop-blur-xl">
-              <ul v-if="sugestoesNome.length > 0" class="py-1.5">
-                <li 
-                  v-for="sugestao in sugestoesNome" 
-                  :key="sugestao.id" 
-                  @mousedown.prevent="selecionarSugestao(sugestao)"
-                  class="flex items-center gap-3 px-5 py-3 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 cursor-pointer transition-all border-b border-gray-50 dark:border-gray-800/50 last:border-0 group"
-                >
-                  <Icon name="fa7-solid:magnifying-glass" class="w-3.5 h-3.5 text-gray-400 group-hover:text-emerald-500 transition-colors shrink-0" />
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400" v-html="destacarTexto(sugestao.descricao, filtro.nomeParam)"></span>
-                </li>
-              </ul>
-              <div v-else-if="!buscandoSugestoes && filtro.nomeParam.length >= 3" class="p-6 text-center flex flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400">
-                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                  <Icon name="fa7-solid:face-frown-open" class="w-6 h-6 opacity-50" />
-                </div>
-                <span class="text-sm">Nenhum nome encontrado para "<b class="text-gray-700 dark:text-gray-200">{{ filtro.nomeParam }}</b>"</span>
-              </div>
-            </div>
-          </Transition>
+          <div class="w-full sm:w-44 shrink-0 relative">
+            <select v-model="filtro.ativoParam" @change="buscarLista" class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all cursor-pointer appearance-none">
+              <option value="">Status: Todos</option>
+              <option value="1">Status: Ativos</option>
+              <option value="0">Status: Inativos</option>
+            </select>
+            <Icon name="fa7-solid:chevron-down" class="absolute right-4 top-4 w-3 h-3 text-gray-400 pointer-events-none" />
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">CPF</label>
-          <input v-model="filtro.cpfParam" v-maska data-maska="###.###.###-##" type="text" class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl px-4 py-3 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400" placeholder="___.___.___-__" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Matrícula</label>
-          <input v-model="filtro.matriculaParam" type="text" class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl px-4 py-3 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-gray-400" placeholder="Nº da matrícula" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Status</label>
-          <select v-model="filtro.ativoParam" class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700/70 rounded-xl px-4 py-3 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all appearance-none cursor-pointer">
-            <option value="" class="dark:bg-gray-800">Todos</option>
-            <option value="1" class="dark:bg-gray-800">Ativo</option>
-            <option value="0" class="dark:bg-gray-800">Inativo</option>
-          </select>
+
+        <div class="flex flex-wrap items-center justify-start xl:justify-end gap-3 w-full xl:w-auto shrink-0">
+          
+          <div class="flex items-center bg-gray-50 dark:bg-gray-900/50 p-1 rounded-xl border border-gray-100 dark:border-gray-800">
+            <button @click="visaoAtual = 'lista'" :class="visaoAtual === 'lista' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 border border-transparent'" class="px-3 sm:px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2">
+              <Icon name="fa7-solid:list-ul" class="w-4 h-4" /> Lista
+            </button>
+            <button @click="visaoAtual = 'cards'" :class="visaoAtual === 'cards' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 border border-transparent'" class="px-3 sm:px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2">
+              <Icon name="fa7-solid:border-all" class="w-4 h-4" /> Cards
+            </button>
+          </div>
+
+          <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block mx-1"></div>
+
+          <button @click="abrirModalExibicao" class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all shadow-sm">
+            <Icon name="fa7-solid:table-columns" class="w-4 h-4 opacity-70" /> Exibição
+          </button>
+
+          <button @click="abrirModalFiltroAvancado" class="flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-800/80 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700/50 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all shadow-sm">
+            <Icon name="fa7-solid:filter" class="w-4 h-4 text-gray-500 dark:text-gray-400" /> Filtros Avançados
+          </button>
+
         </div>
       </div>
 
-      <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800/80 flex flex-col-reverse sm:flex-row justify-between items-center gap-4">
+      <div class="w-full h-px bg-gray-100 dark:bg-gray-800/80"></div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
         
-        <NuxtLink to="/cadastro/funcionario/cadastro" class="w-full sm:w-auto bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-3 shadow-sm">
-          <Icon name="fa7-solid:user-plus" class="w-5 h-5" />
-          Novo Funcionário
+        <NuxtLink to="/cadastro/funcionario/cadastro" class="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition-all shadow-md">
+          <Icon name="fa7-solid:user-plus" class="w-5 h-5" /> Novo Funcionário
         </NuxtLink>
 
-        <button @click="buscarLista" :disabled="carregandoTela" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-3 shadow-md disabled:opacity-70 disabled:cursor-not-allowed">
-          <Icon v-if="carregandoTela" name="fa7-solid:spinner" class="animate-spin w-5 h-5" />
-          <Icon v-else name="fa7-solid:magnifying-glass" class="w-5 h-5" />
-          Pesquisar Funcionários
+        <button @click="buscarLista" class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-3 bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white rounded-xl text-sm font-bold transition-all shadow-md">
+          <Icon name="fa7-solid:magnifying-glass" class="w-5 h-5" /> Pesquisar Funcionários
         </button>
+
       </div>
     </div>
 
@@ -111,7 +121,7 @@
         </div>
         <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-1">Pronto para buscar</h3>
         <p class="font-medium text-sm text-center max-w-sm">
-          Utilize os filtros acima e clique em <span class="font-bold text-gray-600 dark:text-gray-400">"Pesquisar Funcionários"</span> para listar a base.
+          Utilize a busca rápida ou os filtros para listar a base de funcionários.
         </p>
       </div>
 
@@ -180,6 +190,6 @@ const {
   carregandoTela, buscaRealizada, listaRegistros, filtro,
   sugestoesNome, mostrandoSugestoes, buscandoSugestoes,
   buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay,
-  destacarTexto, buscarLista
+  destacarTexto, buscarLista, visaoAtual, abrirModalFiltroAvancado, abrirModalExibicao
 } = useFuncionarioListagem()
 </script>
