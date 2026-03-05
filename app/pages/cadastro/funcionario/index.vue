@@ -225,21 +225,36 @@
       </div>
     </div>
     <AppModalHistorico 
-      :isOpen="modalHistoricoAberto" 
+      :aberto="modalHistoricoAberto" 
       titulo="Histórico do Funcionário"
       :historico="historicoSelecionado"
       @close="modalHistoricoAberto = false" 
+    />
+    <AppModalFiltroAvancado 
+      :aberto="modalFiltroAvancadoAberto"
+      :filtroObj="filtro"
+      :projetos="projetosAtivos"
+      @close="modalFiltroAvancadoAberto = false"
+      @limpar="limparFiltrosAvancados"
+      @aplicar="aplicarFiltroAvancado"
     />
   </div>
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 
 const {
   carregandoTela, buscaRealizada, listaRegistros, filtro,
   sugestoesNome, mostrandoSugestoes, buscandoSugestoes,
   buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay,
   destacarTexto, buscarLista, visaoAtual, abrirModalFiltroAvancado, 
-  abrirModalExibicao,modalHistoricoAberto,historicoSelecionado,abrirModalHistorico
+  abrirModalExibicao, modalHistoricoAberto, historicoSelecionado, abrirModalHistorico, 
+  modalFiltroAvancadoAberto, limparFiltrosAvancados, aplicarFiltroAvancado,
+  projetosAtivos, carregarProjetos
 } = useFuncionarioListagem()
+
+onMounted(() => {
+  carregarProjetos()
+})
 </script>

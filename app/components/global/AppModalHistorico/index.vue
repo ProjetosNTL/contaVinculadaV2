@@ -8,7 +8,7 @@
       leave-from-class="opacity-100 translate-y-0 sm:scale-100"
       leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
     >
-      <div v-if="isOpen" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
+      <div v-if="aberto" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
         
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="fecharModal"></div>
 
@@ -104,7 +104,7 @@
 import { ref } from 'vue'
 
 const props = defineProps({
-  isOpen: {
+  aberto: {
     type: Boolean,
     default: false
   },

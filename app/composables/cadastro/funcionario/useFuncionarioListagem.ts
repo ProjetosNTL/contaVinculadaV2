@@ -8,6 +8,8 @@ export function useFuncionarioListagem() {
   const modalHistoricoAberto = ref(false)
   const historicoSelecionado = ref<any[]>([])
   const carregandoHistorico = ref(false)
+  const modalFiltroAvancadoAberto = ref(false)
+  const projetosAtivos = ref<any[]>([])
 
   const filtro = reactive({
     nomeParam: '',
@@ -84,7 +86,21 @@ export function useFuncionarioListagem() {
   }
 
   const abrirModalFiltroAvancado = () => {
-    console.log('Abrindo modal de Filtro Avançado...')
+    modalFiltroAvancadoAberto.value = true
+  }
+
+  const limparFiltrosAvancados = () => {
+    filtro.cpfParam = ''
+    filtro.matriculaParam = ''
+    filtro.emailParam = ''
+    filtro.projetoParam = ''
+    modalFiltroAvancadoAberto.value = false
+    buscarLista()
+  }
+
+  const aplicarFiltroAvancado = () => {
+    modalFiltroAvancadoAberto.value = false
+    buscarLista()
   }
 
   const abrirModalExibicao = () => {
@@ -116,6 +132,15 @@ export function useFuncionarioListagem() {
     }
   }
 
+  const carregarProjetos = async () => {
+    try {
+      const data = await $fetch<any>('/api/cadastro/projeto/ativos')
+      projetosAtivos.value = data?.data || data || []
+    } catch (erro) {
+      console.error('Erro ao buscar projetos para o filtro:', erro)
+    }
+  }
+
   return {
     carregandoTela,
     buscaRealizada,
@@ -135,6 +160,10 @@ export function useFuncionarioListagem() {
     modalHistoricoAberto,
     historicoSelecionado,
     carregandoHistorico,
-    abrirModalHistorico
+    abrirModalHistorico,
+    modalFiltroAvancadoAberto,
+    aplicarFiltroAvancado,
+    projetosAtivos,
+    carregarProjetos
   }
 }
