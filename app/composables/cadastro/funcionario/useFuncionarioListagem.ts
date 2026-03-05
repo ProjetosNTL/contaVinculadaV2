@@ -12,6 +12,11 @@ export function useFuncionarioListagem() {
   const projetosAtivos = ref<any[]>([])
   const modalExibicaoAberto = ref(false)
 
+  const paginaAtual = ref(1)
+  const itensPorPagina = ref(10)
+  const totalRegistros = ref(0)
+  const totalPaginas = computed(() => Math.ceil(totalRegistros.value / itensPorPagina.value))
+
   const filtro = reactive({
     nomeParam: '',
     cpfParam: '',
@@ -30,6 +35,28 @@ export function useFuncionarioListagem() {
   })
 
   const colunasTemp = reactive({ ...colunasVisiveis })
+
+  const registroInicial = computed(() => {
+    if (totalRegistros.value === 0) return 0
+    return ((paginaAtual.value - 1) * itensPorPagina.value) + 1
+  })
+  
+  const registroFinal = computed(() => {
+    const final = paginaAtual.value * itensPorPagina.value
+    return final > totalRegistros.value ? totalRegistros.value : final
+  })
+
+  const filtrar = () => {
+    paginaAtual.value = 1
+    buscarLista()
+  }
+
+  const mudarPagina = (novaPagina: number) => {
+    if (novaPagina >= 1 && novaPagina <= totalPaginas.value) {
+      paginaAtual.value = novaPagina
+      buscarLista()
+    }
+  }
 
   const sugestoesNome = ref<any[]>([])
   const mostrandoSugestoes = ref(false)
@@ -65,7 +92,7 @@ export function useFuncionarioListagem() {
   const selecionarSugestao = (sugestao: any) => {
     filtro.nomeParam = sugestao.descricao
     mostrandoSugestoes.value = false
-    buscarLista()
+    filtrar()
   }
 
   const fecharSugestoesDelay = () => {
@@ -86,9 +113,14 @@ export function useFuncionarioListagem() {
     try {
       const data = await $fetch<any>('/api/cadastro/funcionario/listagem', {
         method: 'POST',
-        body: filtro
+        body: {
+          ...filtro,
+          pagina: paginaAtual.value,
+          itensPorPagina: itensPorPagina.value
+        }
       })
       listaRegistros.value = data?.results || []
+      totalRegistros.value = data?.total || 0 
     } catch (err: any) {
       console.error(err)
     } finally {
@@ -106,12 +138,12 @@ export function useFuncionarioListagem() {
     filtro.emailParam = ''
     filtro.projetoParam = ''
     modalFiltroAvancadoAberto.value = false
-    buscarLista()
+    filtrar()
   }
 
   const aplicarFiltroAvancado = () => {
     modalFiltroAvancadoAberto.value = false
-    buscarLista()
+    filtrar()
   }
 
   const abrirModalExibicao = () => {
@@ -184,6 +216,14 @@ export function useFuncionarioListagem() {
     colunasVisiveis,
     limparFiltrosAvancados,
     colunasTemp,
-    aplicarExibicao
+    aplicarExibicao,
+    paginaAtual,
+    itensPorPagina,
+    totalRegistros,
+    totalPaginas,
+    registroInicial,
+    registroFinal,
+    filtrar,
+    mudarPagina
   }
 }
