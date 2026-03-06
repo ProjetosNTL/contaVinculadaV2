@@ -8,10 +8,6 @@ export default defineEventHandler(async (event) => {
     try {
         const request = db.request()
 
-        const pagina = Number(body.pagina) || 1
-        const itensPorPagina = Number(body.itensPorPagina) || 10
-        const offset = (pagina - 1) * itensPorPagina
-
         let whereClause = ` WHERE (1 = 1)`
 
         if (body.nomeParam) {
@@ -39,33 +35,18 @@ export default defineEventHandler(async (event) => {
             request.input('ativo', parseInt(body.ativoParam))
         }
 
-        const countQuery = `
-            SELECT COUNT(F.codigo) as total 
-            FROM cadastro.Funcionario F
-            LEFT JOIN cadastro.projeto CP ON CP.codigo = F.projeto
-            ${whereClause}
-        `
-        const countResult = await request.query(countQuery)
-        const totalRegistros = countResult.recordset[0].total
-
-        request.input('offset', offset)
-        request.input('limit', itensPorPagina)
-
-        const selectQuery = `
-            SELECT 
-                F.codigo, F.nomeCompleto, F.cpf, F.matricula, F.email, CP.descricao as projeto, F.ativo 
-            FROM cadastro.Funcionario F
+        const query = `
+            SELECT F.codigo, F.nomeCompleto, F.cpf, F.matricula, F.email, CP.descricao as projeto, F.ativo FROM cadastro.Funcionario F
             LEFT JOIN cadastro.projeto CP ON CP.codigo = F.projeto
             ${whereClause}
             ORDER BY F.nomeCompleto ASC
-            OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
         `
-        const listResult = await request.query(selectQuery)
+        
+        const result = await request.query(query)
 
         return {
             status: 'success',
-            results: listResult.recordset,
-            total: totalRegistros
+            results: result.recordset
         }
 
     } catch (error: any) {

@@ -1,9 +1,8 @@
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 
 export function useFuncionarioListagem() {
   const carregandoTela = ref(false)
   const buscaRealizada = ref(false)
-  const listaRegistros = ref<any[]>([])
   const visaoAtual = ref<'lista' | 'cards'>('lista')
   const modalHistoricoAberto = ref(false)
   const historicoSelecionado = ref<any[]>([])
@@ -12,9 +11,10 @@ export function useFuncionarioListagem() {
   const projetosAtivos = ref<any[]>([])
   const modalExibicaoAberto = ref(false)
 
+  const listaCompleta = ref<any[]>([])
   const paginaAtual = ref(1)
   const itensPorPagina = ref(10)
-  const totalRegistros = ref(0)
+  const totalRegistros = computed(() => listaCompleta.value.length)
   const totalPaginas = computed(() => Math.ceil(totalRegistros.value / itensPorPagina.value))
 
   const filtro = reactive({
@@ -32,6 +32,29 @@ export function useFuncionarioListagem() {
     projeto: true,
     status: true,
     historico: true
+  })
+
+  const paginasExibidas = computed(() => {
+    const total = totalPaginas.value
+    const atual = paginaAtual.value
+
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1)
+    }
+
+    const paginas: (number | string)[] = []
+    
+    if (atual <= 4) {
+      paginas.push(1, 2, 3, 4, 5, '...', total)
+    } 
+    else if (atual >= total - 3) {
+      paginas.push(1, '...', total - 4, total - 3, total - 2, total - 1, total)
+    } 
+    else {
+      paginas.push(1, '...', atual - 1, atual, atual + 1, '...', total)
+    }
+
+    return paginas
   })
 
   const colunasTemp = reactive({ ...colunasVisiveis })
@@ -54,8 +77,12 @@ export function useFuncionarioListagem() {
   const mudarPagina = (novaPagina: number) => {
     if (novaPagina >= 1 && novaPagina <= totalPaginas.value) {
       paginaAtual.value = novaPagina
-      buscarLista()
     }
+  }
+
+  const mudarItensPorPagina = (quantidade: number) => {
+    itensPorPagina.value = quantidade
+    paginaAtual.value = 1
   }
 
   const sugestoesNome = ref<any[]>([])
@@ -107,20 +134,22 @@ export function useFuncionarioListagem() {
     return texto.replace(regex, '<span class="font-extrabold text-emerald-600 dark:text-emerald-400">$1</span>')
   }
 
+  const listaRegistros = computed(() => {
+    const inicio = (paginaAtual.value - 1) * itensPorPagina.value
+    const fim = inicio + itensPorPagina.value
+    return listaCompleta.value.slice(inicio, fim)
+  })
+
   const buscarLista = async () => {
     carregandoTela.value = true
     buscaRealizada.value = true
     try {
       const data = await $fetch<any>('/api/cadastro/funcionario/listagem', {
         method: 'POST',
-        body: {
-          ...filtro,
-          pagina: paginaAtual.value,
-          itensPorPagina: itensPorPagina.value
-        }
+        body: filtro
       })
-      listaRegistros.value = data?.results || []
-      totalRegistros.value = data?.total || 0 
+      listaCompleta.value = data?.results || []
+      paginaAtual.value = 1
     } catch (err: any) {
       console.error(err)
     } finally {
@@ -224,6 +253,8 @@ export function useFuncionarioListagem() {
     registroInicial,
     registroFinal,
     filtrar,
-    mudarPagina
+    mudarPagina,
+    mudarItensPorPagina ,
+    paginasExibidas
   }
 }
