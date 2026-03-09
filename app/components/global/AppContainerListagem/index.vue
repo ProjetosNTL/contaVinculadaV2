@@ -1,28 +1,42 @@
 <template>
-  <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col relative min-h-[300px] mb-6">
+  <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col relative transition-all duration-300 flex-1"
+       :class="(buscaRealizada && lista.length > 0) ? 'min-h-[450px]' : ''">
 
-    <div v-if="carregando" class="absolute inset-0 z-30 bg-white/70 dark:bg-[#1e2029]/80 backdrop-blur-sm flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400 transition-all duration-300">
-      <Icon name="fa7-solid:spinner" class="animate-spin w-12 h-12 mb-4" />
-      <span class="font-bold tracking-wide">Buscando informações...</span>
+    <div v-if="carregando && lista.length === 0" class="flex-1 flex flex-col items-center justify-center py-12 px-6 animate-fade-in">
+      <div class="relative flex items-center justify-center mb-6">
+        <div class="absolute inset-0 bg-emerald-400 dark:bg-emerald-500 rounded-full animate-ping opacity-20"></div>
+        <div class="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center relative z-10 border border-emerald-100 dark:border-emerald-800/50 shadow-sm">
+          <Icon name="fa7-solid:spinner" class="animate-spin w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+        </div>
+      </div>
+      <h3 class="text-xl font-extrabold text-gray-800 dark:text-gray-200 tracking-tight mb-2">Buscando informações</h3>
+      <p class="font-medium text-sm text-gray-500 dark:text-gray-400">Aguarde um momento, estamos processando os dados...</p>
     </div>
 
-    <div v-if="!buscaRealizada" class="flex flex-col items-center justify-center py-16 px-6 text-gray-400 dark:text-gray-500">
-      <div class="w-20 h-20 bg-gray-50 dark:bg-gray-800/50 rounded-full flex items-center justify-center mb-4 border border-dashed border-gray-200 dark:border-gray-700">
-        <Icon name="fa7-solid:magnifying-glass" class="w-8 h-8 opacity-70 text-emerald-500 dark:text-emerald-400" />
+    <div v-else-if="!buscaRealizada" class="flex-1 flex flex-col items-center justify-center py-12 px-6 text-center animate-fade-in">
+      <div class="w-24 h-24 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/80 dark:to-gray-900 rounded-full flex items-center justify-center mb-6 shadow-sm border border-gray-200/60 dark:border-gray-700/50 ring-8 ring-gray-50/50 dark:ring-gray-800/20">
+        <Icon name="fa7-solid:magnifying-glass" class="w-10 h-10 text-emerald-500 dark:text-emerald-400 opacity-90" />
       </div>
-      <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-1">Pronto para buscar</h3>
-      <p class="font-medium text-sm text-center max-w-sm">Utilize a busca rápida ou os filtros para listar os registros.</p>
+      <h3 class="text-xl font-extrabold text-gray-800 dark:text-gray-200 tracking-tight mb-2">Pronto para buscar</h3>
+      <p class="font-medium text-sm text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed">Utilize a barra de pesquisa ou os filtros acima para listar os registros no sistema.</p>
     </div>
 
-    <div v-else-if="lista.length === 0" class="flex flex-col items-center justify-center py-16 px-6 text-gray-400 dark:text-gray-500">
-      <div class="w-20 h-20 bg-gray-50 dark:bg-gray-800/50 rounded-full flex items-center justify-center mb-4 border border-dashed border-gray-200 dark:border-gray-700">
-        <Icon name="fa7-solid:folder-open" class="w-8 h-8 opacity-50" />
+    <div v-else-if="lista.length === 0" class="flex-1 flex flex-col items-center justify-center py-12 px-6 text-center animate-fade-in">
+      <div class="w-24 h-24 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/80 dark:to-gray-900 rounded-full flex items-center justify-center mb-6 shadow-sm border border-gray-200/60 dark:border-gray-700/50 ring-8 ring-gray-50/50 dark:ring-gray-800/20">
+        <Icon name="fa7-solid:folder-open" class="w-10 h-10 text-gray-400 dark:text-gray-500 opacity-80" />
       </div>
-      <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-1">Nenhum resultado</h3>
-      <p class="font-medium text-sm text-center">Nenhum registro encontrado com os filtros informados.</p>
+      <h3 class="text-xl font-extrabold text-gray-800 dark:text-gray-200 tracking-tight mb-2">Nenhum registro encontrado</h3>
+      <p class="font-medium text-sm text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed">Não encontramos dados com os filtros informados. Limpe os filtros e tente novamente.</p>
     </div>
 
     <div v-else class="relative z-10 bg-gray-50/30 dark:bg-transparent flex flex-col flex-1">
+      
+      <div v-if="carregando" class="absolute inset-0 z-30 bg-white/60 dark:bg-[#1e2029]/70 backdrop-blur-sm flex flex-col items-center justify-center transition-all duration-300 rounded-t-2xl">
+        <div class="bg-white dark:bg-gray-800 p-4 px-6 rounded-2xl shadow-xl flex items-center gap-4 border border-emerald-100 dark:border-emerald-900/30 animate-fade-in">
+          <Icon name="fa7-solid:spinner" class="animate-spin w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+          <span class="font-bold text-sm tracking-wide text-gray-800 dark:text-gray-200">Atualizando lista...</span>
+        </div>
+      </div>
 
       <div v-if="visaoAtual === 'cards'" class="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-5 p-4 sm:p-6 mb-4">
         <template v-for="(item, index) in lista" :key="item.codigo || index">
@@ -30,8 +44,8 @@
         </template>
       </div>
 
-      <div v-else class="overflow-x-auto flex flex-col min-h-[400px] mb-4">
-        <table class="w-full text-left border-collapse flex-1">
+      <div v-else class="overflow-x-auto flex-1 mb-4">
+        <table class="w-full text-left border-collapse">
           <thead class="bg-gray-50 dark:bg-[#1a1c23] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-20">
             <tr class="divide-x divide-gray-200 dark:divide-gray-800">
               <slot name="cabecalho-tabela"></slot>
@@ -53,7 +67,6 @@
         </div>
 
         <div class="flex flex-col sm:flex-row items-center gap-4">
-
           <div class="flex items-center gap-2 relative">
             <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Linhas por página:</span>
             <div @click="dropdownLinhasAberto = !dropdownLinhasAberto"
@@ -64,8 +77,8 @@
             </div>
             <div v-if="dropdownLinhasAberto" class="fixed inset-0 z-40" @click="dropdownLinhasAberto = false"></div>
             <Transition name="dropdown">
-              <div v-if="dropdownLinhasAberto" class="absolute bottom-full mb-1 right-0 z-50 w-[70px] bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/80 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl">
-                <ul class="py-1 text-center flex flex-col">
+              <div v-if="dropdownLinhasAberto" class="absolute bottom-full mb-1 right-0 z-50 w-[70px] bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/80 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl py-1">
+                <ul class="text-center flex flex-col">
                   <li v-for="opcao in (visaoAtual === 'cards' ? [12, 24, 48, 96] : [10, 25, 50, 100])" :key="opcao" @click="selecionarLinhas(opcao)"
                     class="px-2 py-2 text-sm cursor-pointer transition-colors"
                     :class="itensPorPagina === opcao ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 font-bold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'">

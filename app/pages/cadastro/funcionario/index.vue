@@ -46,27 +46,27 @@
       @mudar-itens-por-pagina="mudarItensPorPagina">
 
       <template #cabecalho-tabela>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        <th scope="col" class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
           Nome do Funcionário</th>
         <th v-show="colunasVisiveis.cpf" scope="col"
-          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Documento (CPF)
+          class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Documento (CPF)
         </th>
         <th v-show="colunasVisiveis.matricula" scope="col"
-          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
           Matrícula</th>
         <th v-show="colunasVisiveis.projeto" scope="col"
-          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
           Projeto / Alocação</th>
         <th v-show="colunasVisiveis.status" scope="col"
-          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
           Status</th>
         <th v-show="colunasVisiveis.historico" scope="col"
-          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
           Histórico</th>
       </template>
 
       <template #linhas-tabela="{ item }">
-        <td class="px-6 py-4">
+        <td class="px-6 py-2">
           <NuxtLink :to="`/cadastro/funcionario/cadastro?codigo=${item.codigo}`"
             class="flex items-center gap-3 cursor-pointer group-hover:opacity-80 transition-opacity">
             <div
@@ -81,20 +81,20 @@
             </div>
           </NuxtLink>
         </td>
-        <td v-show="colunasVisiveis.cpf" class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400">{{ item.cpf }}
+        <td v-show="colunasVisiveis.cpf" class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400">{{ item.cpf }}
         </td>
         <td v-show="colunasVisiveis.matricula"
-          class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400 text-center">{{ item.matricula }}</td>
-        <td v-show="colunasVisiveis.projeto" class="px-6 py-4 font-medium text-gray-600 dark:text-gray-400 text-center">
+          class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400 text-center">{{ item.matricula }}</td>
+        <td v-show="colunasVisiveis.projeto" class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400 text-center">
           <div
             class="inline-block bg-gray-50 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 px-4 py-2 rounded-2xl text-xs font-semibold leading-relaxed max-w-[250px] whitespace-normal break-words border border-gray-200/50 dark:border-gray-700/50 shadow-sm text-center">
             {{ item.projeto || "Não Alocado" }}
           </div>
         </td>
-        <td v-show="colunasVisiveis.status" class="px-6 py-4 text-center">
+        <td v-show="colunasVisiveis.status" class="px-6 py-2 text-center">
           <AppAtivo :ativo="item.ativo" />
         </td>
-        <td v-show="colunasVisiveis.historico" class="px-6 py-4 text-center">
+        <td v-show="colunasVisiveis.historico" class="px-6 py-2 text-center">
           <button @click="abrirModalHistorico(item.codigo)" title="Ver Histórico"
             class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800/50">
             <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
