@@ -31,8 +31,8 @@ export function useFuncionarioListagem() {
   const colunasTemp = reactive({ ...colunasVisiveis })
 
   const listaCompleta = ref<any[]>([])
-  const paginacao = usePaginacaoFrontEnd(listaCompleta)
-
+  const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
+  
   const filtrar = () => {
     paginacao.resetarPaginacao()
     buscarLista()

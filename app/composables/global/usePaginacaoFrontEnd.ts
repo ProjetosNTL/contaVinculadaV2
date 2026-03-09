@@ -1,8 +1,13 @@
-import { ref, computed, type Ref } from 'vue'
+import { ref, computed, watch, type Ref } from 'vue'
 
-export function usePaginacaoFrontEnd(listaCompleta: Ref<any[]>) {
+export function usePaginacaoFrontEnd(listaCompleta: Ref<any[]>, visaoAtual: Ref<string> = ref('lista')) {
   const paginaAtual = ref(1)
-  const itensPorPagina = ref(10)
+  const itensPorPagina = ref(visaoAtual.value === 'cards' ? 12 : 10)
+
+  watch(visaoAtual, (novaVisao) => {
+    itensPorPagina.value = novaVisao === 'cards' ? 12 : 10
+    paginaAtual.value = 1 
+  })
 
   const totalRegistros = computed(() => listaCompleta.value.length)
   const totalPaginas = computed(() => Math.ceil(totalRegistros.value / itensPorPagina.value))
@@ -60,8 +65,8 @@ export function usePaginacaoFrontEnd(listaCompleta: Ref<any[]>) {
   }
 
   return {
-    paginaAtual,itensPorPagina,totalRegistros,totalPaginas,
-    registroInicial,registroFinal,listaPaginada,paginasExibidas,
-    mudarPagina,mudarItensPorPagina,resetarPaginacao
+    paginaAtual, itensPorPagina, totalRegistros, totalPaginas,
+    registroInicial, registroFinal, listaPaginada, paginasExibidas,
+    mudarPagina, mudarItensPorPagina, resetarPaginacao
   }
 }
