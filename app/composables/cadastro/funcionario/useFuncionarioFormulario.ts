@@ -61,6 +61,7 @@ export function useFuncionarioFormulario() {
           form.email = d.email
           form.projeto = d.projeto
           
+          
           cpfInvalido.value = false
           emailInvalido.value = false
         } else {
@@ -82,6 +83,7 @@ export function useFuncionarioFormulario() {
     form.matricula = ''
     form.email = ''
     form.projeto = ''
+    
     
     cpfInvalido.value = false
     emailInvalido.value = false

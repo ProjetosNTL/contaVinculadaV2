@@ -1,8 +1,8 @@
 <template>
   <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col relative transition-all duration-300"
-       :class="lista.length === 0 ? 'flex-1' : ''">
+       :class="(lista || []).length === 0 ? 'flex-1' : ''">
 
-    <div v-if="carregando && lista.length === 0" class="flex-1 flex flex-col items-center justify-center py-12 px-6 animate-fade-in">
+    <div v-if="carregando && (lista || []).length === 0" class="flex-1 flex flex-col items-center justify-center py-12 px-6 animate-fade-in">
       <div class="relative flex items-center justify-center mb-6">
         <div class="absolute inset-0 bg-emerald-400 dark:bg-emerald-500 rounded-full animate-ping opacity-20"></div>
         <div class="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center relative z-10 border border-emerald-100 dark:border-emerald-800/50 shadow-sm">
@@ -21,7 +21,7 @@
       <p class="font-medium text-sm text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed">Utilize a barra de pesquisa ou os filtros acima para listar os registros no sistema.</p>
     </div>
 
-    <div v-else-if="lista.length === 0" class="flex-1 flex flex-col items-center justify-center py-12 px-6 text-center animate-fade-in">
+    <div v-else-if="(lista || []).length === 0" class="flex-1 flex flex-col items-center justify-center py-12 px-6 text-center animate-fade-in">
       <div class="w-24 h-24 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/80 dark:to-gray-900 rounded-full flex items-center justify-center mb-6 shadow-sm border border-gray-200/60 dark:border-gray-700/50 ring-8 ring-gray-50/50 dark:ring-gray-800/20">
         <Icon name="fa7-solid:folder-open" class="w-10 h-10 text-gray-400 dark:text-gray-500 opacity-80" />
       </div>

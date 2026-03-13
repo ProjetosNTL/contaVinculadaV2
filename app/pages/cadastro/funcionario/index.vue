@@ -1,173 +1,201 @@
 <template>
-  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in">
+  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
 
-    <AppCabecalhoPagina tituloFino="Base de" tituloGrosso="Funcionários"
-      descricao="Gestão e listagem de colaboradores do sistema" icone="fa7-solid:users" />
+    <AppCabecalhoPagina 
+      tituloFino="Base de" 
+      tituloGrosso="Funcionários"
+      descricao="Gestão e listagem de colaboradores do sistema" 
+      icone="fa7-solid:users" 
+    />
 
-    <AppBarraFerramentas v-model:visaoAtual="visaoAtual">
+    <div class="bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm space-y-5">
+      <div class="flex flex-col xl:flex-row items-center gap-4">
+        <div class="flex-1 w-full max-w-2xl">
+          <AppInputAutocomplete 
+            v-model="filtro.nomeParam" 
+            :sugestoes="sugestoesNome" 
+            :buscando="buscandoSugestoes"
+            :mostrarMenu="mostrandoSugestoes" 
+            placeholder="Digite o nome do funcionário..." 
+            @buscar="buscarSugestoesNome"
+            @selecionar="selecionarSugestao" 
+            @fechar="fecharSugestoesDelay" 
+            @enter="buscarLista" 
+          />
+        </div>
 
-      <template #entradas>
-        <AppInputAutocomplete v-model="filtro.nomeParam" :sugestoes="sugestoesNome" :buscando="buscandoSugestoes"
-          :mostrarMenu="mostrandoSugestoes" placeholder="Digite o nome do funcionário..." @buscar="buscarSugestoesNome"
-          @selecionar="selecionarSugestao" @fechar="fecharSugestoesDelay" @enter="buscarLista" />
+        <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto shrink-0">
+          <AppSelecaoStatus v-model="filtro.ativoParam" @change="buscarLista" />
+          
+          <div class="flex items-center bg-gray-50 dark:bg-gray-900/50 p-1 rounded-xl border border-gray-100 dark:border-gray-800">
+            <button @click="visaoAtual = 'lista'" :class="visaoAtual === 'lista' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 font-bold'" class="px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2">
+              <Icon name="fa7-solid:list-ul" class="w-4 h-4" /> Lista
+            </button>
+            <button @click="visaoAtual = 'cards'" :class="visaoAtual === 'cards' ? 'bg-white dark:bg-[#1e2029] shadow-sm text-emerald-600 dark:text-emerald-400 border border-gray-200 dark:border-gray-700' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 font-bold'" class="px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2">
+              <Icon name="fa7-solid:border-all" class="w-4 h-4" /> Cards
+            </button>
+          </div>
 
-        <AppSelecaoStatus v-model="filtro.ativoParam" @change="buscarLista" />
-      </template>
+          <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden xl:block mx-1"></div>
 
-      <template #acoes-secundarias>
-        <button @click="abrirModalExibicao"
-          class="flex items-center gap-2 px-4 h-11 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all shadow-sm">
-          <Icon name="fa7-solid:table-columns" class="w-4 h-4 opacity-70" /> Exibição
-        </button>
+          <AppBotao variacao="padrao" icone="fa7-solid:table-columns" @click="abrirModalExibicao">Exibição</AppBotao>
+          <AppBotao variacao="padrao" icone="fa7-solid:filter" @click="abrirModalFiltroAvancado">Filtros Avançados</AppBotao>
+        </div>
+      </div>
 
-        <button @click="abrirModalFiltroAvancado"
-          class="flex items-center gap-2 px-4 h-11 bg-gray-100 dark:bg-gray-800/80 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700/50 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all shadow-sm">
-          <Icon name="fa7-solid:filter" class="w-4 h-4 text-gray-500 dark:text-gray-400" /> Filtros Avançados
-        </button>
-      </template>
+      <div class="w-full h-px bg-gray-100 dark:bg-gray-800/80"></div>
 
-      <template #acoes-principais>
-        <NuxtLink to="/cadastro/funcionario/cadastro"
-          class="w-full sm:w-auto flex items-center justify-center gap-3 px-6 h-11 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition-all shadow-md">
-          <Icon name="fa7-solid:user-plus" class="w-5 h-5" /> Novo Funcionário
-        </NuxtLink>
-        <button @click="buscarLista"
-          class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 h-11 bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white rounded-xl text-sm font-bold transition-all shadow-md">
-          <Icon name="fa7-solid:magnifying-glass" class="w-5 h-5" /> Pesquisar Funcionários
-        </button>
-      </template>
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <AppBotao variacao="primario" icone="fa7-solid:user-plus" @click="navigateTo('/cadastro/funcionario/cadastro')">
+          Novo Funcionário
+        </AppBotao>
+        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarLista">
+          Pesquisar Funcionários
+        </AppBotao>
+      </div>
+    </div>
 
-    </AppBarraFerramentas>
-
-    <AppContainerListagem :carregando="carregandoTela" :busca-realizada="buscaRealizada" :lista="listaRegistros"
-      :visao-atual="visaoAtual" :registro-inicial="registroInicial" :registro-final="registroFinal"
-      :total-registros="totalRegistros" :itens-por-pagina="itensPorPagina" :total-paginas="totalPaginas"
-      :pagina-atual="paginaAtual" :paginas-exibidas="paginasExibidas" @mudar-pagina="mudarPagina"
-      @mudar-itens-por-pagina="mudarItensPorPagina">
+    <AppContainerListagem 
+      :carregando="carregando" 
+      :buscaRealizada="buscaRealizada"
+      :lista="dados || []" 
+      :visaoAtual="visaoAtual"
+      :registroInicial="registroInicial"
+      :registroFinal="registroFinal"
+      :totalRegistros="totalRegistros"
+      :itensPorPagina="itensPorPagina"
+      :totalPaginas="totalPaginas"
+      :paginaAtual="paginaAtual"
+      :paginasExibidas="paginasExibidas"
+      @mudarPagina="mudarPagina"
+      @mudarItensPorPagina="mudarItensPorPagina"
+    >
 
       <template #cabecalho-tabela>
-        <th scope="col" class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-          Nome do Funcionário</th>
-        <th v-show="colunasVisiveis.cpf" scope="col"
-          class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Documento (CPF)
-        </th>
-        <th v-show="colunasVisiveis.matricula" scope="col"
-          class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          Funcionário</th>
+        <th v-if="colunas.matricula" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
           Matrícula</th>
-        <th v-show="colunasVisiveis.projeto" scope="col"
-          class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-          Projeto / Alocação</th>
-        <th v-show="colunasVisiveis.status" scope="col"
-          class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+        <th v-if="colunas.cpf" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          CPF</th>
+        <th v-if="colunas.status" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
           Status</th>
-        <th v-show="colunasVisiveis.historico" scope="col"
-          class="px-6 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-          Histórico</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">
+          Ações</th>
       </template>
 
       <template #linhas-tabela="{ item }">
-        <td class="px-6 py-2 max-w-[250px] whitespace-normal">
-          <NuxtLink :to="`/cadastro/funcionario/cadastro?codigo=${item.codigo}`"
-            class="flex items-center gap-3 cursor-pointer group-hover:opacity-80 transition-opacity">
-            <div
-              class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0 border border-transparent group-hover:border-emerald-300 transition-colors">
+        <td class="px-6 py-4 max-w-[300px]">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0">
               {{ item.nomeCompleto.charAt(0).toUpperCase() }}
             </div>
             <div class="flex flex-col min-w-0">
-              <span
-                class="font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors break-words">{{
-                  item.nomeCompleto }}</span>
-              <span class="text-xs text-gray-500 dark:text-gray-500 break-words">{{ item.email }}</span>
+              <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{{ item.nomeCompleto }}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ item.email }}</span>
             </div>
-          </NuxtLink>
-        </td>
-        
-        <td v-show="colunasVisiveis.cpf" class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
-          {{ item.cpf }}
-        </td>
-        
-        <td v-show="colunasVisiveis.matricula"
-          class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.matricula }}</td>
-          
-        <td v-show="colunasVisiveis.projeto" class="px-6 py-2 font-medium text-gray-600 dark:text-gray-400 text-center">
-          <div
-            class="inline-block bg-gray-50 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 px-4 py-2 rounded-2xl text-xs font-semibold leading-relaxed max-w-[220px] whitespace-normal break-words border border-gray-200/50 dark:border-gray-700/50 shadow-sm text-center">
-            {{ item.projeto || "Não Alocado" }}
           </div>
         </td>
-        
-        <td v-show="colunasVisiveis.status" class="px-6 py-2 text-center whitespace-nowrap">
-          <AppAtivo :ativo="item.ativo" />
+        <td v-if="colunas.matricula" class="px-6 py-4 text-center">
+          <span class="text-xs font-bold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-lg">{{ item.matricula }}</span>
         </td>
-        <td v-show="colunasVisiveis.historico" class="px-6 py-2 text-center whitespace-nowrap">
-          <button @click="abrirModalHistorico(item.codigo)" title="Ver Histórico"
-            class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800/50">
-            <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
-          </button>
+        <td v-if="colunas.cpf" class="px-6 py-4 text-center">
+          <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ item.cpf }}</span>
+        </td>
+        <td v-if="colunas.status" class="px-6 py-4 text-center">
+          <AppAtivo :ativo="String(item.ativo) === '1'" />
+        </td>
+        <td class="px-6 py-4 text-right">
+          <div class="flex items-center justify-end gap-2">
+            <button v-if="colunas.historico" @click="abrirHistorico(item.codigo)"
+              class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+              title="Ver Histórico">
+              <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
+            </button>
+            <NuxtLink :to="`/cadastro/funcionario/cadastro?codigo=${item.codigo}`"
+              class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all"
+              title="Editar">
+              <Icon name="fa7-solid:pen-to-square" class="w-4 h-4" />
+            </NuxtLink>
+          </div>
         </td>
       </template>
 
-      <template #cards="{ item }">
-        <AppCardListagem :titulo="item.nomeCompleto" subtituloNome="Matrícula" :subtituloValor="item.matricula"
-          :ativo="item.ativo" :categoriaTexto="item.projeto || 'Não Alocado'" categoriaIcone="fa7-solid:building"
-          :mostrarSubtitulo="colunasVisiveis.matricula" :mostrarStatus="colunasVisiveis.status"
-          :mostrarCategoria="colunasVisiveis.projeto" :mostrarHistorico="colunasVisiveis.historico" :detalhes="[
-            ...(colunasVisiveis.cpf ? [{ icone: 'fa7-solid:address-card', texto: item.cpf }] : []),
-            { icone: 'fa7-solid:envelope', texto: item.email || 'Sem e-mail' }
-          ]" @clique-titulo="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
+      <template #cards-grade="{ item }">
+        <AppCardListagem 
+          :titulo="item.nomeCompleto" 
+          subtituloNome="E-mail"
+          :subtituloValor="item.email"
+          :ativo="String(item.ativo) === '1'"
+          :mostrarHistorico="colunas.historico"
+          :detalhes="[
+            { icone: 'fa7-solid:id-badge', texto: `Matrícula: ${item.matricula}` },
+            { icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }
+          ]"
           @ver-detalhes="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
-          @ver-historico="abrirModalHistorico(item.codigo)" />
+          @ver-historico="abrirHistorico(item.codigo)"
+          @clique-titulo="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
+        />
       </template>
 
     </AppContainerListagem>
 
-    <AppModalHistorico :aberto="modalHistoricoAberto" titulo="Histórico do Funcionário"
-      :historico="historicoSelecionado" @close="modalHistoricoAberto = false" />
-    
-    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" 
-      @close="modalFiltroAvancadoAberto = false" @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
-      
+    <AppModalHistorico 
+      :aberto="modalHistoricoAberto" 
+      :codigoOriginal="codigoHistorico"
+      @close="modalHistoricoAberto = false" 
+    />
+
+    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false"
+      @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
+
       <AppInputCpf v-model="filtro.cpfParam" label="Documento (CPF)" placeholder="Digite o CPF..." />
-      
-      <AppInputTexto v-model="filtro.matriculaParam" label="Matrícula" placeholder="Ex: 31758" icone="fa7-solid:id-badge" />
-      
+
+      <AppInputTexto v-model="filtro.matriculaParam" label="Matrícula" placeholder="Ex: 31758"
+        icone="fa7-solid:id-badge" />
+
       <AppSelect v-model="filtro.projetoParam" label="Projeto / Alocação" placeholder="Todos os Projetos"
         :opcoes="projetosFormatados" />
-      
+
       <AppInputEmail v-model="filtro.emailParam" label="E-mail" placeholder="email@empresa.com" />
-      
+
     </AppModalFiltroAvancado>
 
-    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labelsColunas" 
-      @close="modalExibicaoAberto = false" @aplicar="aplicarExibicao" />
+    <AppModalExibicao 
+      :aberto="modalExibicaoAberto" 
+      :colunas="colunas"
+      :labels="labels"
+      @aplicar="aplicarExibicao"
+      @close="modalExibicaoAberto = false" 
+    />
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { computed, onMounted } from 'vue'
 
 const {
-  carregandoTela, buscaRealizada, listaRegistros, filtro, sugestoesNome, mostrandoSugestoes, buscandoSugestoes,
-  buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay, visaoAtual, abrirModalFiltroAvancado,
-  abrirModalExibicao, modalHistoricoAberto, historicoSelecionado, abrirModalHistorico, modalFiltroAvancadoAberto,
-  limparFiltrosAvancados, aplicarFiltroAvancado, projetosAtivos, carregarProjetos, modalExibicaoAberto,
-  colunasVisiveis, colunasTemp, aplicarExibicao, paginaAtual, itensPorPagina, totalRegistros, totalPaginas,
-  registroInicial, registroFinal, mudarPagina, mudarItensPorPagina, paginasExibidas, buscarLista,
-  labelsColunas 
-} = useFuncionarioListagem();
+  carregando, buscaRealizada, visaoAtual, dados, filtro, sugestoesNome, buscandoSugestoes, mostrandoSugestoes,
+  buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay, buscarLista,
+  abrirHistorico, modalHistoricoAberto, codigoHistorico,
+  modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
+  modalExibicaoAberto, abrirModalExibicao, carregarProjetos, projetosAtivos,
+  colunas, labels, aplicarExibicao,
+  registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
+  mudarPagina, mudarItensPorPagina
+} = useFuncionarioListagem()
 
 const projetosFormatados = computed(() => {
-  return [
-    { codigo: '', descricao: 'Todos os Projetos' }, 
-    ...projetosAtivos.value.map(p => ({
-      codigo: p.codigo,
-      descricao: `${p.apelido} - ${p.descricao}`
-    }))
-  ]
+  const lista = projetosAtivos.value || []
+  return lista.map(p => ({
+    codigo: p.codigo,
+    descricao: `${p.apelido} - ${p.descricao}`
+  }))
 })
 
 onMounted(() => {
-  carregarProjetos();
-});
+  carregarProjetos()
+  buscarLista()
+})
 </script>

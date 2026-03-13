@@ -140,11 +140,14 @@ export function useFuncionarioListagem() {
     modalExibicaoAberto.value = false
   }
 
-  const abrirModalHistorico = async (codigo: number) => {
+  const codigoHistorico = ref<number | null>(null)
+
+  const abrirHistorico = async (codigo: number) => {
+    codigoHistorico.value = codigo
     modalHistoricoAberto.value = true
     carregandoHistorico.value = true
     historicoSelecionado.value = [] 
-
+    
     try {
       const data = await $fetch<any>('/api/cadastro/funcionario/historico', {
         method: 'POST',
@@ -153,8 +156,6 @@ export function useFuncionarioListagem() {
       
       if (data && data.status === 'success') {
         historicoSelecionado.value = data.data
-      } else {
-        console.error(data?.message || 'Erro ao carregar histórico')
       }
     } catch (err) {
       console.error('Falha na API de histórico:', err)
@@ -173,6 +174,7 @@ export function useFuncionarioListagem() {
   }
 
   return {
+    carregando: carregandoTela,
     carregandoTela,
     buscaRealizada,
     filtro,
@@ -190,19 +192,24 @@ export function useFuncionarioListagem() {
     modalHistoricoAberto,
     historicoSelecionado,
     carregandoHistorico,
-    abrirModalHistorico,
+    abrirHistorico,
+    codigoHistorico,
     modalFiltroAvancadoAberto,
     aplicarFiltroAvancado,
     projetosAtivos,
     carregarProjetos,
     modalExibicaoAberto,
+    colunas: colunasVisiveis,
     colunasVisiveis,
+    labels: labelsColunas,
+    labelsColunas,
     limparFiltrosAvancados,
     colunasTemp,
     aplicarExibicao,
     filtrar,
     labelsColunas,
     
+    dados: paginacao.listaPaginada,
     listaRegistros: paginacao.listaPaginada,
     paginaAtual: paginacao.paginaAtual,
     itensPorPagina: paginacao.itensPorPagina,

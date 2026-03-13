@@ -1,0 +1,40 @@
+<template>
+  <div class="pt-6 mt-8 border-t border-gray-100 dark:border-gray-800/80 flex flex-col sm:flex-row gap-4 items-center justify-between">
+    
+    <!-- Ações à esquerda -->
+    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+      <AppBotao variacao="padrao" icone="fa7-solid:arrow-left" @click="$emit('voltar')">
+        {{ labelVoltar }}
+      </AppBotao>
+
+      <AppBotao v-if="editando" variacao="perigo" icone="fa7-solid:trash-can" :carregando="carregandoExclusao" @click="$emit('excluir')">
+        {{ labelExcluir }}
+      </AppBotao>
+    </div>
+    
+    <!-- Ações à direita -->
+    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+      <AppBotao variacao="padrao" icone="fa7-solid:file" @click="$emit('limpar')">
+        {{ labelLimpar }}
+      </AppBotao>
+      
+      <AppBotao nativeType="submit" variacao="primario" icone="fa7-solid:floppy-disk" :carregando="carregandoGravar" @click="$emit('gravar')">
+        {{ labelGravar }}
+      </AppBotao>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+defineProps({
+  editando: { type: Boolean, default: false },
+  carregandoGravar: { type: Boolean, default: false },
+  carregandoExclusao: { type: Boolean, default: false },
+  labelVoltar: { type: String, default: 'Voltar' },
+  labelExcluir: { type: String, default: 'Excluir' },
+  labelLimpar: { type: String, default: 'Limpar / Novo' },
+  labelGravar: { type: String, default: 'Gravar Dados' }
+})
+
+defineEmits(['voltar', 'excluir', 'limpar', 'gravar'])
+</script>
