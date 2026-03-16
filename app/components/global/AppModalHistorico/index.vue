@@ -31,7 +31,12 @@
 
           <div class="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-custom bg-gray-50/50 dark:bg-transparent relative z-10">
             
-            <div v-if="!historico || historico.length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
+            <div v-if="carregando" class="flex flex-col items-center justify-center py-20">
+              <Icon name="fa7-solid:spinner" class="animate-spin w-10 h-10 text-emerald-500 mb-4" />
+              <p class="text-gray-500 font-medium">Carregando histórico...</p>
+            </div>
+
+            <div v-else-if="!historico || historico.length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
               <Icon name="fa7-solid:box-open" class="w-12 h-12 mb-3 opacity-50" />
               <p class="font-medium">Nenhum histórico encontrado para este registro.</p>
             </div>
@@ -119,6 +124,10 @@ const props = defineProps({
       alteracoes: Array<any>
     }>,
     default: () => []
+  },
+  carregando: {
+    type: Boolean,
+    default: false
   }
 })
 

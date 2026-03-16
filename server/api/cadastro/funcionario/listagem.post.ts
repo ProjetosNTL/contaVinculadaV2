@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
         }
 
         const query = `
-            SELECT F.codigo, F.nomeCompleto, F.cpf, F.matricula, F.email, CP.descricao as projeto, F.ativo FROM cadastro.Funcionario F
+            SELECT F.codigo, F.nomeCompleto, F.cpf, F.matricula, F.email, CP.apelido as projeto, F.ativo FROM cadastro.Funcionario F
             LEFT JOIN cadastro.projeto CP ON CP.codigo = F.projeto
             ${whereClause}
             ORDER BY F.nomeCompleto ASC
