@@ -121,7 +121,7 @@
         </td>
       </template>
 
-      <template #cards-grade="{ item }">
+      <template #cards="{ item }">
         <AppCardListagem 
           :titulo="item.nomeCompleto" 
           subtituloNome="E-mail"
@@ -130,6 +130,7 @@
           :mostrarHistorico="colunas.historico"
           :detalhes="[
             { icone: 'fa7-solid:id-badge', texto: `Matrícula: ${item.matricula}` },
+            { icone: 'fa7-solid:id-card', texto: `Projeto: ${item.projeto || 'Sem Projeto'}` },
             { icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }
           ]"
           @ver-detalhes="navigateTo(`/cadastro/funcionario/cadastro?codigo=${item.codigo}`)"
