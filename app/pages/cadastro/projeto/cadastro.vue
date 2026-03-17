@@ -24,16 +24,16 @@
           </AppFormularioSecao>
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-            <div class="md:col-span-5">
+            <div class="md:col-span-5" :class="{ 'animate-shake': erros.has('cnpj') }">
               <AppInputCnpj v-model="form.cnpj" label="CNPJ da Empresa" required @blur="verificarCnpj" />
             </div>
-            <div class="md:col-span-3">
+            <div class="md:col-span-3" :class="{ 'animate-shake': erros.has('apelido') }">
               <AppInputTexto v-model="form.apelido" label="Apelido / Sigla" placeholder="Ex: PROJ-X" required maxlength="20" icone="fa7-solid:tag" />
             </div>
-            <div class="md:col-span-4">
+            <div class="md:col-span-4" :class="{ 'animate-shake': erros.has('descricao') }">
               <AppInputTexto v-model="form.descricao" label="Descrição Resumida" placeholder="Resumo do projeto..." required maxlength="100" icone="fa7-solid:comment-dots" />
             </div>
-            <div class="md:col-span-12 mt-2">
+            <div class="md:col-span-12 mt-2" :class="{ 'animate-shake': erros.has('razaoSocial') }">
               <AppInputTexto v-model="form.razaoSocial" label="Razão Social (Nome Empresarial)" placeholder="Nome empresarial oficial conforme contrato social..." required maxlength="100" icone="fa7-solid:building" />
             </div>
           </div>
@@ -46,22 +46,22 @@
           </AppFormularioSecao>
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-            <div class="md:col-span-3">
+            <div class="md:col-span-3" :class="{ 'animate-shake': erros.has('cep') }">
               <AppInputCep v-model="form.cep" label="CEP Principal" required />
             </div>
-            <div class="md:col-span-7">
+            <div class="md:col-span-7" :class="{ 'animate-shake': erros.has('logradouro') }">
               <AppInputTexto v-model="form.logradouro" label="Logradouro" placeholder="Avenida, Rua, Praça, etc..." required maxlength="100" />
             </div>
-            <div class="md:col-span-2">
+            <div class="md:col-span-2" :class="{ 'animate-shake': erros.has('numeroEndereco') }">
               <AppInputTexto v-model="form.numeroEndereco" label="Nº" placeholder="123" required maxlength="10" />
             </div>
-            <div class="md:col-span-5">
+            <div class="md:col-span-5" :class="{ 'animate-shake': erros.has('bairro') }">
               <AppInputTexto v-model="form.bairro" label="Bairro / Distrito" placeholder="Digite o bairro..." required maxlength="50" />
             </div>
-            <div class="md:col-span-5">
+            <div class="md:col-span-5" :class="{ 'animate-shake': erros.has('cidade') }">
               <AppInputTexto v-model="form.cidade" label="Município" placeholder="Digite a cidade..." required maxlength="50" />
             </div>
-            <div class="md:col-span-2">
+            <div class="md:col-span-2" :class="{ 'animate-shake': erros.has('uf') }">
               <AppInputTexto v-model="form.uf" label="UF (Estado)" placeholder="RJ" required maxlength="2" />
             </div>
           </div>
@@ -80,7 +80,7 @@
             <div class="md:col-span-3">
               <AppInputTexto v-model="form.valorFaturamento" label="Expectativa de Faturamento" placeholder="R$ 0,00" icone="fa7-solid:money-bill-wave" />
             </div>
-            <div class="md:col-span-3">
+            <div class="md:col-span-3" :class="{ 'animate-shake': erros.has('tipoDeCalculo') }">
               <AppSelect 
                 v-model="form.tipoDeCalculo" 
                 label="Metodologia de Cálculo" 
@@ -88,7 +88,7 @@
                 required 
               />
             </div>
-            <div class="md:col-span-3">
+            <div class="md:col-span-3" :class="{ 'animate-shake': erros.has('saldoOficio') }">
               <AppSelect 
                 v-model="form.saldoOficio" 
                 label="Habilitar Saldo Ofício?" 
@@ -171,6 +171,60 @@
         </AppBotao>
       </template>
     </AppModal>
+
+    <!-- Modal de Sucesso com Resumo -->
+    <AppModal 
+      :isOpen="modalSucessoAberto" 
+      title="Sucesso: Registro Salvo" 
+      icon="fa7-solid:circle-check"
+      semScroll
+      @close="voltarParaLista"
+    >
+      <div class="flex flex-col items-center py-6 text-center">
+        <!-- Ícone Animado -->
+        <div class="relative mb-8">
+          <div class="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
+          <div class="relative w-24 h-24 bg-gradient-to-tr from-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-2xl animate-success-pop">
+            <Icon name="fa7-solid:check" class="w-12 h-12 text-white" />
+          </div>
+        </div>
+        
+        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+          {{ editando ? 'Alterações Salvas!' : 'Projeto Criado!' }}
+        </h3>
+        <p class="text-gray-500 dark:text-gray-400 text-lg mb-8">O projeto foi {{ editando ? 'atualizado' : 'cadastrado' }} com sucesso no sistema.</p>
+
+        <!-- Resumo dos Dados -->
+        <div class="w-full bg-gray-50 dark:bg-gray-900/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-800 text-left space-y-4">
+          <h4 class="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-4">Resumo do Registro</h4>
+          
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-white dark:bg-[#1e2029] flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm">
+              <Icon name="fa7-solid:building" class="text-gray-400" />
+            </div>
+            <div>
+              <p class="text-[10px] uppercase font-bold text-gray-400">Apelido / Sigla</p>
+              <p class="font-extrabold text-gray-800 dark:text-gray-200">{{ form.apelido }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-white dark:bg-[#1e2029] flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm">
+              <Icon name="fa7-solid:address-card" class="text-gray-400" />
+            </div>
+            <div>
+              <p class="text-[10px] uppercase font-bold text-gray-400">CNPJ</p>
+              <p class="font-bold text-gray-600 dark:text-gray-400">{{ form.cnpj }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <AppBotao variacao="primario" @click="voltarParaLista" class="w-full h-14 text-lg rounded-2xl shadow-xl shadow-emerald-500/20">
+          Voltar para Listagem
+        </AppBotao>
+      </template>
+    </AppModal>
   </div>
 </template>
 
@@ -182,11 +236,45 @@ const {
   carregandoTela, carregandoGravacao, carregandoExclusao, modalExclusaoAberto, form, editando,
   carregarDados, voltarParaLista, limparFormulario, verificarCnpj,
   abrirModalExclusao, fecharModal, gravarRegistro, excluirRegistro,
-  modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta 
+  modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta,
+  erros, modalSucessoAberto
 } = useProjetoFormulario()
 
 onMounted(() => { 
   carregarDados() 
 })
 </script>
+
+<style scoped>
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-4px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.animate-shake :deep(input),
+.animate-shake :deep(select) {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+@keyframes success-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-success-pop {
+  animation: success-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.dark .animate-shake :deep(input) {
+  background-color: rgba(239, 68, 68, 0.05) !important;
+}
+</style>
 

@@ -14,8 +14,42 @@ export function useProjetoFormulario() {
   const passoAtual = ref(0)
   const totalPassos = 3
 
+  const modalSucessoAberto = ref(false)
+  const erros = reactive(new Set<string>())
+
+  const validarEtapa = () => {
+    erros.clear()
+    
+    if (passoAtual.value === 0) {
+      if (!form.cnpj) erros.add('cnpj')
+      if (!form.apelido) erros.add('apelido')
+      if (!form.descricao) erros.add('descricao')
+      if (!form.razaoSocial) erros.add('razaoSocial')
+    } else if (passoAtual.value === 1) {
+      if (!form.cep) erros.add('cep')
+      if (!form.logradouro) erros.add('logradouro')
+      if (!form.numeroEndereco) erros.add('numeroEndereco')
+      if (!form.bairro) erros.add('bairro')
+      if (!form.cidade) erros.add('cidade')
+      if (!form.uf) erros.add('uf')
+    } else if (passoAtual.value === 2) {
+      if (!form.tipoDeCalculo) erros.add('tipoDeCalculo')
+      if (!form.saldoOficio) erros.add('saldoOficio')
+    }
+
+    if (erros.size > 0) {
+      // Pequeno timeout para resetar a animação de shake se necessário
+      return false
+    }
+    return true
+  }
+
   const avancarPasso = () => {
-    if (passoAtual.value < totalPassos - 1) passoAtual.value++
+    if (validarEtapa()) {
+      if (passoAtual.value < totalPassos - 1) passoAtual.value++
+    } else {
+      mostrarAlerta('Campos Incompletos', 'Por favor, preencha todos os campos obrigatórios desta etapa antes de prosseguir.')
+    }
   }
 
   const voltarPasso = () => {
@@ -174,7 +208,7 @@ export function useProjetoFormulario() {
         body: form
       })
       if (res.status === 'success') {
-        voltarParaLista()
+        modalSucessoAberto.value = true
       } else {
         mostrarAlerta('Erro ao Gravar', res.mensagem || 'Ocorreu um erro ao tentar gravar.')
       }
@@ -229,6 +263,8 @@ export function useProjetoFormulario() {
     fecharModal,
     fecharModalAlerta,
     gravarRegistro,
-    excluirRegistro
+    excluirRegistro,
+    erros,
+    modalSucessoAberto
   }
 }

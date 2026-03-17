@@ -59,7 +59,10 @@ Para formulários com muitos campos ou divisões lógicas claras, use o padrão 
   </div>
   <AppCartaoFormulario> ... </AppCartaoFormulario>
   ```
-- **UX**: O rodapé deve alternar entre "Próxima Etapa" e "Finalizar Cadastro" conforme o `passoAtual`.
+- **UX**: 
+  - O rodapé deve alternar entre "Próxima Etapa" e "Finalizar Cadastro" conforme o `passoAtual`.
+  - **Validação Visual**: Implementar o efeito `animate-shake` nos campos obrigatórios que não forem preenchidos ao tentar avançar uma etapa.
+  - **Confirmação de Sucesso**: Ao finalizar, exibir um `AppModal` de sucesso com um resumo dos dados persistidos (ex: Apelido, CNPJ) para dar segurança ao usuário.
 
 ---
 
@@ -81,6 +84,8 @@ Toda a inteligência deve estar em composables dedicados.
 Em formulários multi-etapas, o composable deve gerenciar:
 - `passoAtual: number`: Índice da etapa ativa.
 - `avancarPasso()` / `voltarPasso()`: Funções de navegação com validação.
+- `validarEtapa()`: Lógica que popula um `Set` ou `Array` de `erros` para disparar animações visuais.
+- `modalSucessoAberto: Ref<boolean>`: Controle do modal de resumo pós-gravacao.
 - `totalPassos: number`: Constante para controle de fim de fluxo.
 
 ---
@@ -109,3 +114,4 @@ Em formulários multi-etapas, o composable deve gerenciar:
   - Usar `gap-6` entre campos.
   - Alinhamento `items-end` para garantir que labels e inputs fiquem equilibrados visualmente.
   - Labels sempre em caixa alta (uppercase) e com `tracking-wider` (através dos componentes de input).
+- **Feedback de Erro**: O efeito de shake deve ser aplicado no container do campo (através da classe `:class="{ 'animate-shake': erros.has('campo') }"`) para garantir que o usuário identifique o problema sem a necessidade de alertas intrusivos.
