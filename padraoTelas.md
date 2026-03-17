@@ -64,7 +64,10 @@ Este documento define os padrões visuais e funcionais para o desenvolvimento de
 
 ---
 
-## 4. Design System e UX
+### 4. Design System e UX
 - **Iconografia**: Utilizar a biblioteca `fa7-solid` ou similar via componente `<Icon />`.
 - **Feedback Visual**: Botões de ação devem ter ícones e estados de `carregando`.
 - **Acessibilidade**: Labels em maiúsculas, textos auxiliares em cinza claro, e contrastes adequados para o modo Dark.
+- **Regra de Exclusão**: No sistema, a ação de "Excluir" deve ser tratada como **Inativação** (soft delete). 
+  - O ícone recomendado é `fa7-solid:user-slash` ou `fa7-solid:lock`.
+  - O modal de confirmação deve informar claramente que o registro permanecerá no histórico e poderá ser reativado.

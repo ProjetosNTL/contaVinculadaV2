@@ -27,6 +27,7 @@ export function useFuncionarioFormulario() {
     matricula: string
     email: string
     projeto: string | number
+    ativo: number | boolean
   }
 
   const form = reactive<FuncionarioForm>({
@@ -35,7 +36,8 @@ export function useFuncionarioFormulario() {
     cpf: '',
     matricula: '',
     email: '',
-    projeto: ''
+    projeto: '',
+    ativo: 1
   })
 
   const editando = computed(() => !!form.codigo)
@@ -76,6 +78,7 @@ export function useFuncionarioFormulario() {
           form.matricula = d.matricula
           form.email = d.email
           form.projeto = d.projeto ? Number(d.projeto) : ''
+          form.ativo = d.ativo
           
           cpfInvalido.value = false
           emailInvalido.value = false

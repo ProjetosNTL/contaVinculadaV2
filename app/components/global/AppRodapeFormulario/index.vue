@@ -7,7 +7,7 @@
         {{ labelVoltar }}
       </AppBotao>
 
-      <AppBotao v-if="editando" variacao="perigo" icone="fa7-solid:trash-can" :carregando="carregandoExclusao" @click="$emit('excluir')">
+      <AppBotao v-if="editando" variacao="perigo" :icone="iconeExcluir" :carregando="carregandoExclusao" @click="$emit('excluir')">
         {{ labelExcluir }}
       </AppBotao>
     </div>
@@ -32,6 +32,7 @@ defineProps({
   carregandoExclusao: { type: Boolean, default: false },
   labelVoltar: { type: String, default: 'Voltar' },
   labelExcluir: { type: String, default: 'Excluir' },
+  iconeExcluir: { type: String, default: 'fa7-solid:trash-can' },
   labelLimpar: { type: String, default: 'Limpar / Novo' },
   labelGravar: { type: String, default: 'Gravar Dados' }
 })

@@ -46,8 +46,10 @@
         </div>
 
         <AppRodapeFormulario 
-          :editando="editando" 
+          :editando="editando && (Number(form.ativo) === 1 || form.ativo === true)" 
           :carregandoGravar="carregandoGravacao"
+          labelExcluir="Inativar"
+          iconeExcluir="fa7-solid:user-slash"
           @voltar="voltarParaLista"
           @excluir="abrirModalExclusao"
           @limpar="limparFormulario"
@@ -57,21 +59,41 @@
 
     <AppModal 
       :isOpen="modalExclusaoAberto" 
-      title="Atenção: Exclusão" 
-      icon="fa7-solid:triangle-exclamation"
+      title="Atenção: Inativação" 
+      icon="fa7-solid:user-slash"
+      tamanho="sm"
+      rodapeEntre
+      semScroll
       @close="fecharModal"
     >
-      <div class="bg-red-50 dark:bg-red-900/20 p-6 rounded-xl border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300">
-         <p class="text-lg text-center font-bold">Confirma a exclusão permanente deste funcionário?</p>
-         <p class="text-sm text-center mt-2 opacity-80">Esta ação não poderá ser desfeita e removerá os dados do banco.</p>
+      <div class="flex flex-col items-center py-2 text-center">
+        <div class="relative mb-6">
+          <div class="absolute inset-0 bg-amber-500/20 blur-2xl rounded-full"></div>
+          <div class="relative w-20 h-20 bg-gradient-to-tr from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700 rounded-full flex items-center justify-center shadow-xl">
+            <Icon name="fa7-solid:user-lock" class="w-10 h-10 text-white" />
+          </div>
+        </div>
+        
+        <h4 class="text-2xl font-black text-gray-900 dark:text-white mb-3">
+          Inativar Funcionário
+        </h4>
+        
+        <p class="text-gray-500 dark:text-gray-400 text-base leading-relaxed max-w-[320px]">
+          Você está prestes a tornar <strong class="text-gray-800 dark:text-gray-200">{{ form.nomeCompleto }}</strong> inativo. Ele não aparecerá mais nas listagens principais.
+        </p>
+        
+        <div class="mt-8 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 rounded-2xl flex items-center gap-3 text-amber-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
+          <Icon name="fa7-solid:circle-info" class="w-5 h-5 shrink-0" />
+          <span>O registro permanecerá no histórico</span>
+        </div>
       </div>
       <template #footer>
         <AppBotao variacao="padrao" @click="fecharModal">
           Cancelar
         </AppBotao>
         
-        <AppBotao variacao="perigo" icone="fa7-solid:trash" :carregando="carregandoExclusao" @click="excluirRegistro">
-          Sim, Excluir
+        <AppBotao variacao="perigo" icone="fa7-solid:user-slash" :carregando="carregandoExclusao" @click="excluirRegistro">
+          Sim, Inativar
         </AppBotao>
       </template>
     </AppModal>
