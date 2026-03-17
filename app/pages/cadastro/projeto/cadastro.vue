@@ -1,90 +1,101 @@
 <template>
-  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in">
+  <div class="min-h-full flex flex-col p-4 md:p-10 animate-fade-in">
     
     <AppTrilhaNavegacao 
       icone="fa7-solid:briefcase" 
+      class="mb-8"
       :links="[{ label: 'Projetos', to: '/cadastro/projeto' }]"
       :paginaAtual="editando ? form.apelido || 'Editando Registro' : 'Novo Registro'"
     />
 
-    <AppPassosFormulario :passos="['Dados Gerais', 'Endereço', 'Parâmetros']" :passoAtual="passoAtual" />
+    <div class="mb-8">
+      <AppPassosFormulario :passos="['Dados Gerais', 'Endereço', 'Parâmetros']" :passoAtual="passoAtual" />
+    </div>
 
-    <AppCartaoFormulario>
+    <AppCartaoFormulario class="py-10 px-8 sm:px-12">
       <AppSobreposicaoCarregamento :carregando="carregandoTela" mensagem="Carregando dados do projeto..." />
 
-      <form v-if="!carregandoTela" @submit.prevent="passoAtual === 2 ? gravarRegistro() : avancarPasso()" class="space-y-8 relative z-0">
+      <form v-if="!carregandoTela" @submit.prevent="passoAtual === 2 ? gravarRegistro() : avancarPasso()" class="space-y-10 relative z-0">
         
         <!-- Passo 0: Dados Gerais -->
         <div v-if="passoAtual === 0" class="animate-fade-in">
           <AppFormularioSecao icone="fa7-solid:file-lines">
-            Dados Gerais
+            Identificação do Projeto
           </AppFormularioSecao>
 
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8">
-            <div class="md:col-span-4">
-              <AppInputCnpj v-model="form.cnpj" required @blur="verificarCnpj" />
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+            <div class="md:col-span-5">
+              <AppInputCnpj v-model="form.cnpj" label="CNPJ da Empresa" required @blur="verificarCnpj" />
+            </div>
+            <div class="md:col-span-3">
+              <AppInputTexto v-model="form.apelido" label="Apelido / Sigla" placeholder="Ex: PROJ-X" required maxlength="20" icone="fa7-solid:tag" />
             </div>
             <div class="md:col-span-4">
-              <AppInputTexto v-model="form.apelido" label="Apelido/Sigla" placeholder="Ex: PROJ-X" required maxlength="20" icone="fa7-solid:tag" />
+              <AppInputTexto v-model="form.descricao" label="Descrição Resumida" placeholder="Resumo do projeto..." required maxlength="100" icone="fa7-solid:comment-dots" />
             </div>
-            <div class="md:col-span-4">
-              <AppInputTexto v-model="form.descricao" label="Descrição Curta" placeholder="Resumo do projeto..." required maxlength="100" icone="fa7-solid:comment-dots" />
-            </div>
-            <div class="md:col-span-12">
-              <AppInputTexto v-model="form.razaoSocial" label="Razão Social" placeholder="Nome empresarial oficial..." required maxlength="100" icone="fa7-solid:building" />
+            <div class="md:col-span-12 mt-2">
+              <AppInputTexto v-model="form.razaoSocial" label="Razão Social (Nome Empresarial)" placeholder="Nome empresarial oficial conforme contrato social..." required maxlength="100" icone="fa7-solid:building" />
             </div>
           </div>
         </div>
 
-        <!-- Passo 1: Endereço e Contato -->
+        <!-- Passo 1: Endereço e Localização -->
         <div v-if="passoAtual === 1" class="animate-fade-in">
           <AppFormularioSecao icone="fa7-solid:location-dot">
-            Endereço e Contato
+            Localização e Endereço
           </AppFormularioSecao>
 
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
             <div class="md:col-span-3">
-              <AppInputCep v-model="form.cep" required />
+              <AppInputCep v-model="form.cep" label="CEP Principal" required />
             </div>
             <div class="md:col-span-7">
-              <AppInputTexto v-model="form.logradouro" label="Logradouro" placeholder="Rua, Av, etc..." required maxlength="100" />
+              <AppInputTexto v-model="form.logradouro" label="Logradouro" placeholder="Avenida, Rua, Praça, etc..." required maxlength="100" />
             </div>
             <div class="md:col-span-2">
-              <AppInputTexto v-model="form.numeroEndereco" label="Número" placeholder="123" required maxlength="10" />
+              <AppInputTexto v-model="form.numeroEndereco" label="Nº" placeholder="123" required maxlength="10" />
             </div>
-            <div class="md:col-span-4">
-              <AppInputTexto v-model="form.bairro" label="Bairro" placeholder="Digite o bairro..." required maxlength="50" />
+            <div class="md:col-span-5">
+              <AppInputTexto v-model="form.bairro" label="Bairro / Distrito" placeholder="Digite o bairro..." required maxlength="50" />
             </div>
-            <div class="md:col-span-6">
-              <AppInputTexto v-model="form.cidade" label="Cidade" placeholder="Digite a cidade..." required maxlength="50" />
+            <div class="md:col-span-5">
+              <AppInputTexto v-model="form.cidade" label="Município" placeholder="Digite a cidade..." required maxlength="50" />
             </div>
             <div class="md:col-span-2">
-              <AppInputTexto v-model="form.uf" label="UF" placeholder="RJ" required maxlength="2" />
+              <AppInputTexto v-model="form.uf" label="UF (Estado)" placeholder="RJ" required maxlength="2" />
             </div>
           </div>
         </div>
 
-        <!-- Passo 2: Parâmetros do Sistema -->
+        <!-- Passo 2: Parâmetros e Regras -->
         <div v-if="passoAtual === 2" class="animate-fade-in">
           <AppFormularioSecao icone="fa7-solid:gears">
-            Parâmetros do Sistema
+            Parâmetros Contratuais e Financeiros
           </AppFormularioSecao>
 
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-8">
-            <AppInputTexto v-model="form.numeroFuncionarios" label="Nº Funcionários" type="number" icone="fa7-solid:users" />
-            <AppInputTexto v-model="form.valorFaturamento" label="Faturamento" placeholder="R$ 0,00" icone="fa7-solid:money-bill-wave" />
-            <AppSelect 
-              v-model="form.tipoDeCalculo" 
-              label="Tipo de Cálculo" 
-              :opcoes="[{ codigo: '1', descricao: 'Vencimento' }, { codigo: '2', descricao: 'Extra' }]" 
-              required 
-            />
-            <AppSelect 
-              v-model="form.saldoOficio" 
-              label="Saldo Ofício" 
-              :opcoes="[{ codigo: '1', descricao: 'Sim' }, { codigo: '0', descricao: 'Não' }]" 
-              required 
-            />
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+            <div class="md:col-span-3">
+              <AppInputTexto v-model="form.numeroFuncionarios" label="Quantidade de Funcionários" type="number" icone="fa7-solid:users" placeholder="0" />
+            </div>
+            <div class="md:col-span-3">
+              <AppInputTexto v-model="form.valorFaturamento" label="Expectativa de Faturamento" placeholder="R$ 0,00" icone="fa7-solid:money-bill-wave" />
+            </div>
+            <div class="md:col-span-3">
+              <AppSelect 
+                v-model="form.tipoDeCalculo" 
+                label="Metodologia de Cálculo" 
+                :opcoes="[{ codigo: '1', descricao: 'Vencimento Padrão' }, { codigo: '2', descricao: 'Cálculo Extraordinário' }]" 
+                required 
+              />
+            </div>
+            <div class="md:col-span-3">
+              <AppSelect 
+                v-model="form.saldoOficio" 
+                label="Habilitar Saldo Ofício?" 
+                :opcoes="[{ codigo: '1', descricao: 'Sim, Ativado' }, { codigo: '0', descricao: 'Não, Desativado' }]" 
+                required 
+              />
+            </div>
           </div>
         </div>
 
@@ -178,4 +189,4 @@ onMounted(() => {
   carregarDados() 
 })
 </script>
-
+

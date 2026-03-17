@@ -1,36 +1,69 @@
 <template>
-  <div class="flex items-center justify-between max-w-4xl mx-auto mb-10 px-4">
-    <div v-for="(passo, index) in passos" :key="index" class="flex items-center flex-1 last:flex-none">
-      <!-- Círculo e Label -->
-      <div class="flex flex-col items-center relative z-10">
+  <div class="w-full px-6 py-6 bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+    <div class="flex items-start justify-between relative px-4 sm:px-10">
+      
+      <!-- Linha Conectora de Fundo (Sutil como no padrão) -->
+      <div class="absolute top-5 left-12 right-12 h-[1px] bg-gray-100 dark:bg-gray-800 z-0">
         <div 
-          class="w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 shadow-lg"
-          :class="[
-             index <= passoAtual 
-               ? 'bg-emerald-600 border-emerald-100 dark:border-emerald-900/50 text-white scale-110' 
-               : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400'
-          ]"
-        >
-          <Icon v-if="index < passoAtual" name="fa7-solid:check" class="w-5 h-5" />
-          <span v-else class="font-bold text-lg">{{ index + 1 }}</span>
-        </div>
-        <span 
-          class="absolute -bottom-8 whitespace-nowrap text-sm font-bold transition-colors duration-300"
-          :class="index <= passoAtual ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500'"
-        >
-          {{ passo }}
-        </span>
+          class="h-full bg-emerald-500 transition-all duration-700 ease-out"
+          :style="{ width: (passoAtual / (passos.length - 1)) * 100 + '%' }"
+        ></div>
       </div>
 
-      <!-- Linha Conectora -->
-      <div 
-        v-if="index < passos.length - 1" 
-        class="h-1 flex-1 mx-2 rounded-full transition-colors duration-500"
-        :class="index < passoAtual ? 'bg-emerald-600' : 'bg-gray-100 dark:bg-gray-800'"
-      ></div>
+      <div v-for="(passo, index) in passos" :key="index" class="flex flex-col items-center flex-1 relative z-10 group">
+        
+        <!-- Círculo do Passo (Fino e elegante) -->
+        <div class="relative mb-3">
+          <div 
+            class="w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-500 relative bg-white dark:bg-[#1e2029]"
+            :class="[
+               index < passoAtual 
+                 ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm' 
+                 : index === passoAtual
+                   ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-500/10 font-black'
+                   : 'border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-700'
+            ]"
+          >
+            <transition name="scale" mode="out-in">
+              <Icon v-if="index < passoAtual" name="fa7-solid:check" class="w-4 h-4" key="check" />
+              <span v-else class="text-sm font-bold" :key="index">{{ index + 1 }}</span>
+            </transition>
+          </div>
+        </div>
+        
+        <!-- Label do Passo -->
+        <div class="flex flex-col items-center gap-1">
+          <span 
+            class="text-[10px] sm:text-[11px] font-bold text-center transition-all duration-300 tracking-wider uppercase"
+            :class="[
+              index < passoAtual ? 'text-emerald-500/70' : 
+              index === passoAtual ? 'text-gray-900 dark:text-white' : 
+              'text-gray-300 dark:text-gray-700'
+            ]"
+          >
+            {{ passo }}
+          </span>
+          
+          <!-- Indicador de Status Sutil -->
+          <div 
+            class="h-0.5 rounded-full transition-all duration-500 overflow-hidden"
+            :class="index === passoAtual ? 'w-4 bg-emerald-500' : 'w-0 bg-transparent'"
+          ></div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.scale-enter-active, .scale-leave-active {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.scale-enter-from, .scale-leave-to {
+  transform: scale(0);
+  opacity: 0;
+}
+</style>
 
 <script setup lang="ts">
 defineProps({
