@@ -1,119 +1,121 @@
 <template>
-  <AppModal :isOpen="isOpen" title="Extrato do Projeto" @close="fechar" size="4xl">
-    <div class="p-4 bg-gray-50 border rounded-md mb-4 shadow-sm">
-      <div class="flex items-center gap-4 mb-4">
-        <span class="font-bold text-sm text-gray-700">Visualizar:</span>
-        <div class="flex gap-2">
-          <button @click="mudarTipo(0)" :class="filtro.tipo === 0 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700 hover:bg-gray-400'" class="px-4 py-1.5 rounded-full text-sm font-semibold transition-colors">Todas</button>
-          <button @click="mudarTipo(1)" :class="filtro.tipo === 1 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700 hover:bg-gray-400'" class="px-4 py-1.5 rounded-full text-sm font-semibold transition-colors">Entradas</button>
-          <button @click="mudarTipo(2)" :class="filtro.tipo === 2 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700 hover:bg-gray-400'" class="px-4 py-1.5 rounded-full text-sm font-semibold transition-colors">Saídas</button>
+  <AppModal :isOpen="isOpen" title="Extrato Detalhado do Projeto" icon="fa7-solid:clipboard-list" @close="fechar" tamanho="4xl">
+    
+    <div class="space-y-6">
+      <!-- Filtros do Extrato -->
+      <div class="p-5 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-5">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="text-xs font-black uppercase tracking-widest text-gray-400">Visualizar:</span>
+          <div class="flex gap-2 p-1 bg-white dark:bg-[#1e2029] rounded-xl border border-gray-100 dark:border-gray-800">
+            <button v-for="t in [{v:0, l:'Todas'}, {v:1, l:'Entradas'}, {v:2, l:'Saídas'}]" :key="t.v"
+              @click="mudarTipo(t.v)"
+              :class="filtro.tipo === t.v ? 'bg-emerald-500 text-white shadow-lg' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
+              class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">
+              {{ t.l }}
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div class="md:col-span-2 lg:col-span-1">
+            <AppSelect v-model="filtro.periodoAtalho" label="Atalho" :opcoes="[
+              { codigo: '', descricao: 'Selecione...' },
+              { codigo: '7', descricao: 'Últimos 7 dias' },
+              { codigo: '15', descricao: 'Últimos 15 dias' },
+              { codigo: '30', descricao: 'Últimos 30 dias' }
+            ]" @change="aplicarAtalhoPeriodo" />
+          </div>
+          <AppInputTexto v-model="filtro.dataInicial" label="Data Inicial" placeholder="DD/MM/AAAA" v-maska data-maska="##/##/####" icone="fa7-solid:calendar" @blur="buscarDetalhes" />
+          <AppInputTexto v-model="filtro.dataFinal" label="Data Final" placeholder="DD/MM/AAAA" v-maska data-maska="##/##/####" icone="fa7-solid:calendar" @blur="buscarDetalhes" />
+          <AppSelect v-model="filtro.agrupar" label="Agrupamento" :opcoes="[{ codigo: '1', descricao: 'Agrupado (Total)' }, { codigo: '0', descricao: 'Individ. (Func.)' }]" @change="buscarDetalhes" />
+          <AppSelect v-model="filtro.ordenar" label="Ordem" :opcoes="[{ codigo: '1', descricao: 'Mais recente' }, { codigo: '0', descricao: 'Mais antigo' }]" @change="buscarDetalhes" />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="md:col-span-3">
+             <AppSelect v-model="filtro.lancamento" label="Tipo de Lançamento" :opcoes="[
+                { codigo: '', descricao: 'Todos os tipos' },
+                { codigo: '1', descricao: 'Contracheque' },
+                { codigo: '2', descricao: 'Lançamento Manual' },
+                { codigo: '3', descricao: 'Reembolso' },
+                { codigo: '5', descricao: 'Décimo Terceiro' },
+                { codigo: '6', descricao: 'Férias' },
+                { codigo: '7', descricao: 'Multa FGTS' },
+                { codigo: '8', descricao: 'Submódulo' }
+              ]" @change="buscarDetalhes" />
+          </div>
+          <AppSelect v-model="filtro.detalhar" label="Ver Detalhes?" :opcoes="[{ codigo: '0', descricao: 'Não' }, { codigo: '1', descricao: 'Sim' }]" @change="buscarDetalhes" />
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-        <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">Período específico</label>
-          <select v-model="filtro.periodoAtalho" @change="aplicarAtalhoPeriodo" class="w-full border rounded p-1.5 text-sm bg-white">
-            <option value="">Selecione</option>
-            <option value="7">Últimos 7 dias</option>
-            <option value="15">Últimos 15 dias</option>
-            <option value="30">Últimos 30 dias</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">Data Inicial</label>
-          <div class="relative">
-            <Icon name="fa-solid:calendar" class="absolute left-2 top-2 text-gray-400 text-xs" />
-            <input v-model="filtro.dataInicial" v-maska data-maska="##/##/####" type="text" class="w-full border rounded p-1.5 pl-7 text-sm text-center" placeholder="__/__/____" @blur="buscarDetalhes" />
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">Data Final</label>
-          <div class="relative">
-            <Icon name="fa-solid:calendar" class="absolute left-2 top-2 text-gray-400 text-xs" />
-            <input v-model="filtro.dataFinal" v-maska data-maska="##/##/####" type="text" class="w-full border rounded p-1.5 pl-7 text-sm text-center" placeholder="__/__/____" @blur="buscarDetalhes" />
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">Agrupar Lançamentos</label>
-          <select v-model="filtro.agrupar" @change="buscarDetalhes" class="w-full border rounded p-1.5 text-sm bg-white">
-            <option value="1">Sim (Totalizado)</option>
-            <option value="0">Não (Por Func.)</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">Ordenar por</label>
-          <select v-model="filtro.ordenar" @change="buscarDetalhes" class="w-full border rounded p-1.5 text-sm bg-white">
-            <option value="1">Mais recente</option>
-            <option value="0">Mais antigo</option>
-          </select>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-xs font-medium text-gray-600 mb-1">Lançamento / Detalhar</label>
-          <div class="flex gap-2">
-            <select v-model="filtro.lancamento" @change="buscarDetalhes" class="w-2/3 border rounded p-1.5 text-sm bg-white">
-              <option value="">Todos</option>
-              <option value="1">Contracheque</option>
-              <option value="2">Lançamento Manual</option>
-              <option value="3">Lançamento Reembolso</option>
-              <option value="5">Décimo Terceiro</option>
-              <option value="6">Férias</option>
-              <option value="7">Multa FGTS</option>
-              <option value="8">Submódulo</option>
-            </select>
-            <select v-model="filtro.detalhar" @change="buscarDetalhes" class="w-1/3 border rounded p-1.5 text-sm bg-white">
-              <option value="0">Não</option>
-              <option value="1">Sim</option>
-            </select>
-          </div>
+      <!-- Tabela de Movimentações -->
+      <div class="bg-white dark:bg-[#1e2029] border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto max-h-[450px]">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-50 dark:bg-gray-800/50 sticky top-0 z-10">
+              <tr>
+                <th class="px-5 py-3 text-[10px] font-black uppercase text-gray-400">Participantes</th>
+                <th class="px-5 py-3 text-[10px] font-black uppercase text-gray-400">Lançamento / Descrição</th>
+                <th class="px-5 py-3 text-[10px] font-black uppercase text-gray-400 text-center">Data</th>
+                <th class="px-5 py-3 text-[10px] font-black uppercase text-gray-400 text-right">Valor</th>
+                <th class="px-5 py-3 text-[10px] font-black uppercase text-gray-400 text-right">Saldo do Projeto</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+              <tr v-if="carregando">
+                <td colspan="5" class="py-20 text-center">
+                   <Icon name="fa7-solid:circle-notch" class="w-8 h-8 text-emerald-500 animate-spin mb-2" />
+                   <p class="text-sm text-gray-400 font-bold">Processando extrato...</p>
+                </td>
+              </tr>
+              <tr v-else-if="detalhes.length === 0">
+                <td colspan="5" class="py-20 text-center flex flex-col items-center">
+                   <div class="w-16 h-16 bg-gray-50 dark:bg-gray-900 rounded-full flex items-center justify-center mb-4 text-gray-200">
+                      <Icon name="fa7-solid:ghost" class="w-8 h-8" />
+                   </div>
+                   <p class="text-sm text-gray-400 font-medium">Nenhuma movimentação encontrada.</p>
+                </td>
+              </tr>
+              <tr v-for="(item, idx) in detalhes" :key="idx" class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors group">
+                <td class="px-5 py-4">
+                  <div class="flex flex-col">
+                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300 leading-tight">{{ item.nomeFuncionario }}</span>
+                    <span class="text-[10px] text-gray-400">Usuário: {{ item.usuarioCadastro || '-' }}</span>
+                  </div>
+                </td>
+                <td class="px-5 py-4">
+                   <p class="text-sm text-gray-600 dark:text-gray-400 italic leading-snug truncate max-w-[250px]" :title="item.detalhes || item.tipoLancamentoDesc">
+                     {{ item.detalhes || item.tipoLancamentoDesc }}
+                   </p>
+                </td>
+                <td class="px-5 py-4 text-center">
+                  <span class="text-xs font-bold text-gray-500">{{ item.dataCadastroFormatada }}</span>
+                </td>
+                <td class="px-5 py-4 text-right">
+                  <span class="text-sm font-black" :class="item.tipoMovimentacao === 1 ? 'text-emerald-500' : 'text-red-500'">
+                    {{ item.tipoMovimentacao === 1 ? '+' : '-' }} R$ {{ formatarMoeda(item.valorMovimentacao) }}
+                  </span>
+                </td>
+                <td class="px-5 py-4 text-right">
+                   <div class="inline-block px-3 py-1 rounded-lg font-bold text-sm bg-gray-50 dark:bg-gray-900" :class="item.saldoAcumulado >= 0 ? 'text-emerald-700' : 'text-red-700'">
+                     R$ {{ formatarMoeda(item.saldoAcumulado) }}
+                   </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <div class="overflow-y-auto max-h-[400px] border rounded-md mb-4 shadow-sm relative">
-      <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
-        <thead class="bg-[#2F5597] text-white sticky top-0 z-10">
-          <tr>
-            <th class="p-2 border-b">Funcionário</th>
-            <th class="p-2 border-b">Usuário</th>
-            <th class="p-2 border-b">Lançamento / Descrição</th>
-            <th class="p-2 border-b text-center">Data</th>
-            <th class="p-2 border-b text-right">Valor</th>
-            <th class="p-2 border-b text-right">Saldo Projeto</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="carregando">
-            <td colspan="6" class="p-8 text-center text-gray-500 font-bold">Buscando extrato...</td>
-          </tr>
-          <tr v-else-if="detalhes.length === 0">
-            <td colspan="6" class="p-8 text-center text-gray-500">Nenhum lançamento encontrado para este filtro.</td>
-          </tr>
-          <tr v-for="(item, idx) in detalhes" :key="idx" class="hover:bg-gray-100 border-b even:bg-gray-50">
-            <td class="p-2 truncate max-w-[200px]" :title="item.nomeFuncionario">{{ item.nomeFuncionario }}</td>
-            <td class="p-2">{{ item.usuarioCadastro || '-' }}</td>
-            <td class="p-2 truncate max-w-[200px]" :title="item.detalhes || item.tipoLancamentoDesc">
-              {{ item.detalhes || item.tipoLancamentoDesc }}
-            </td>
-            <td class="p-2 text-center">{{ item.dataCadastroFormatada }}</td>
-            <td class="p-2 text-right font-semibold" :class="item.tipoMovimentacao === 1 ? 'text-green-600' : 'text-red-600'">
-              {{ item.tipoMovimentacao === 1 ? '+' : '-' }} R$ {{ formatarMoeda(item.valorMovimentacao) }}
-            </td>
-            <td class="p-2 text-right font-bold" :class="item.saldoAcumulado >= 0 ? 'text-green-700' : 'text-red-700'">
-              R$ {{ formatarMoeda(item.saldoAcumulado) }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="flex justify-between items-center mt-4 border-t pt-4">
-      <button @click="exportarExcel" :disabled="gerandoExcel || detalhes.length === 0" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center disabled:opacity-50">
-        <span>{{ gerandoExcel ? 'Gerando...' : 'Exportar Excel' }}</span>
-        <Icon v-if="!gerandoExcel" name="fa-solid:file-excel" class="ml-2" />
-      </button>
-      <button @click="fechar" class="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400 font-bold">Fechar</button>
-    </div>
+    <template #footer>
+      <div class="flex w-full justify-between items-center gap-4">
+        <AppBotao variacao="primario" icone="fa7-solid:file-excel" :carregando="gerandoExcel" :disabled="detalhes.length === 0" @click="exportarExcel">
+          Exportar para Excel
+        </AppBotao>
+        <AppBotao variacao="padrao" @click="fechar">Fechar Extrato</AppBotao>
+      </div>
+    </template>
   </AppModal>
 </template>
 
@@ -132,7 +134,7 @@ const carregando = ref(false)
 const gerandoExcel = ref(false)
 
 const filtro = ref({
-  tipo: 0, // 0 = Todas, 1 = Entradas, 2 = Saídas
+  tipo: 0, 
   periodoAtalho: '',
   dataInicial: '',
   dataFinal: '',
@@ -176,7 +178,7 @@ const buscarDetalhes = async () => {
   if (!props.projetoId) return
   carregando.value = true
   try {
-    const response = await $fetch<{ data: any[] }>('/api/operacao/movimentacaoBancaria/extratoProjeto/detalhes', {
+    const response = await $fetch<{ status: string, data: any[] }>('/api/operacao/movimentacaoBancaria/extratoProjeto/detalhes', {
       method: 'POST',
       body: { projeto: props.projetoId, ...filtro.value }
     })
@@ -206,7 +208,6 @@ const exportarExcel = async () => {
     document.body.removeChild(link)
   } catch (error) {
     console.error('Erro ao exportar Excel:', error)
-    alert("Falha ao gerar o arquivo Excel.")
   } finally {
     gerandoExcel.value = false
   }
@@ -214,7 +215,6 @@ const exportarExcel = async () => {
 
 const fechar = () => emit('close')
 
-// Monitora abertura do modal pra buscar os dados e resetar filtros se precisar
 watch(() => props.isOpen, (newVal) => {
   if (newVal) {
     filtro.value = { tipo: 0, periodoAtalho: '', dataInicial: '', dataFinal: '', agrupar: '1', detalhar: '0', ordenar: '1', lancamento: '' }

@@ -64,6 +64,6 @@ export default defineEventHandler(async (event) => {
     return { status: 'success', data: dataFormatada }
   } catch (erro) {
     console.error('Erro detalhes extrato:', erro)
-    return { status: 'failed', message: 'Erro ao buscar no banco de dados.' }
+    return { status: 'failed', mensagem: 'Erro ao buscar no banco de dados.' }
   }
 })
