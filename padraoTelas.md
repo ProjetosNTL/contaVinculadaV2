@@ -13,6 +13,7 @@ Este documento é a referência definitiva para a criação de novas telas no si
    - Telas de **Cadastro** (`cadastro.vue`): **OBRIGATÓRIO** o uso de `AppBarraNavegacao` no topo.
    - Telas de **Processo/Wizards**: Usam `AppTrilhaNavegacao` (ex: telas que não são CRUDs puros).
 3. **Grid System**: Sempre usar `md:grid-cols-12` com `gap-x-6 gap-y-8`. Nunca use grids genéricos (`cols-3`) para manter o alinhamento vertical dos labels.
+4. **Reuso de Componentes**: O desenvolvedor (IA ou Humano) deve **SEMPRE** analisar a pasta `app/components/global/` antes de criar qualquer elemento visual. É proibido usar tags HTML puras (`input`, `select`, `button`) quando houver um componente `App` correspondente (ex: `AppInputTexto`, `AppSelect`, `AppBotao`).
 
 ---
 
