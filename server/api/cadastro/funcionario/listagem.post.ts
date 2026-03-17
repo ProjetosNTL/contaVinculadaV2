@@ -1,5 +1,6 @@
 import { defineEventHandler, readBody, createError } from 'h3'
 import { useDb } from '../../../utils/db'
+import { comum } from '../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -44,9 +45,15 @@ export default defineEventHandler(async (event) => {
         
         const result = await request.query(query)
 
+        const records = result.recordset.map((f: any) => ({
+            ...f,
+            cpf: comum.formatarCpf(f.cpf),
+            nomeAbreviado: comum.abreviarNome(f.nomeCompleto)
+        }))
+
         return {
             status: 'success',
-            results: result.recordset
+            results: records
         }
 
     } catch (error: any) {

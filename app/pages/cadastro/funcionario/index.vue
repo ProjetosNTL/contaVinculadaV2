@@ -87,7 +87,7 @@
             <div class="flex flex-col min-w-0">
               <span
                 class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{{
-                  item.nomeCompleto }}</span>
+                  item.nomeAbreviado || item.nomeCompleto }}</span>
               <span class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ item.email }}</span>
             </div>
           </NuxtLink>
@@ -119,7 +119,7 @@
       </template>
 
       <template #cards="{ item }">
-        <AppCardListagem :titulo="item.nomeCompleto" subtituloNome="E-mail" :subtituloValor="item.email"
+        <AppCardListagem :titulo="item.nomeAbreviado || item.nomeCompleto" subtituloNome="E-mail" :subtituloValor="item.email"
           :ativo="Number(item.ativo) === 1 || item.ativo === true" :mostrarStatus="colunas.status"
           :mostrarHistorico="colunas.historico" :detalhes="[
             ...(colunas.matricula ? [{ icone: 'fa7-solid:id-badge', texto: `Matrícula: ${item.matricula}` }] : []),

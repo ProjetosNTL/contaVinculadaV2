@@ -1,4 +1,5 @@
 import { useDb } from '../../../utils/db'
+import { comum } from '../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)
@@ -22,9 +23,13 @@ export default defineEventHandler(async (event) => {
         const result = await request.query(sql)
 
         if (result.recordset.length > 0) {
+            const f = result.recordset[0]
             return {
                 status: 'success',
-                data: result.recordset[0]
+                data: {
+                    ...f,
+                    dataAdmissao: comum.formatarDataBr(f.dataAdmissao)
+                }
             }
         } else {
             return { status: 'failed', mensagem: 'Funcionário não encontrado.' }

@@ -1,21 +1,21 @@
 <template>
   <div class="bg-white dark:bg-[#1a1c23] border border-gray-200 dark:border-gray-700/60 rounded-3xl p-6 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 transition-all duration-300 shadow-sm hover:shadow-lg group flex flex-col gap-5 relative overflow-hidden">
     
-    <div class="flex items-start justify-between gap-3">
-      <div @click="$emit('clique-titulo')" title="Clique para abrir os detalhes" class="flex items-center gap-4 flex-1 group-hover:opacity-80 transition-opacity cursor-pointer">
+    <div class="flex items-center justify-between gap-4">
+      <div @click="$emit('clique-titulo')" title="Clique para abrir os detalhes" class="flex items-center gap-4 flex-1 min-w-0 group-hover:opacity-80 transition-opacity cursor-pointer">
         <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-extrabold text-lg shrink-0 border border-transparent group-hover:border-emerald-300 transition-colors">
           {{ titulo.charAt(0).toUpperCase() }}
         </div>
-        <div class="flex flex-col">
-          <h3 class="font-extrabold text-lg text-gray-900 dark:text-gray-100 leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1" :title="titulo">
+        <div class="flex flex-col min-w-0">
+          <h3 class="font-extrabold text-lg text-gray-900 dark:text-gray-100 leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate" :title="titulo">
             {{ titulo }}
           </h3>
-          <span v-show="mostrarSubtitulo" class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5">
-            {{ subtituloNome }}: <span class="text-gray-700 dark:text-gray-300">{{ subtituloValor }}</span>
+          <span v-show="mostrarSubtitulo" class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1 truncate">
+            {{ subtituloNome }}: <span class="text-gray-700 dark:text-gray-300 font-semibold">{{ subtituloValor }}</span>
           </span>
         </div>
       </div>
-      <AppAtivo v-show="mostrarStatus" :ativo="ativo" />
+      <AppAtivo v-show="mostrarStatus" :ativo="ativo" class="shrink-0" />
     </div>
 
     <div v-show="mostrarCategoria && categoriaTexto">

@@ -1,4 +1,5 @@
 import { useDb } from '../../../utils/db'
+import { comum } from '../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -8,6 +9,10 @@ export default defineEventHandler(async (event) => {
     const usuarioId = 1 // fixo provisoriamente
 
     const { codigo, cpf, matricula, nomeCompleto, email, projeto } = body
+
+    if (!comum.validaCPF(cpf)) {
+        return { status: 'failed', mensagem: 'CPF informado é inválido.' }
+    }
 
     try {
         const request = db.request()

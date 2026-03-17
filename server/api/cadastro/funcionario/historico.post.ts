@@ -1,5 +1,6 @@
 import { defineEventHandler, readBody } from 'h3'
 import { useDb } from '../../../utils/db'
+import { comum } from '../../../utils/comum'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -41,17 +42,13 @@ export default defineEventHandler(async (event) => {
       ativo: 'Status'
     }
 
-    // Funções auxiliares para formatar data (substituindo o `$comum->formataDataParaBR`)
-    const formatarData = (dataStr: any) => dataStr ? new Date(dataStr).toLocaleDateString('pt-BR') : 'Vazio'
-    const formatarDataHora = (dataStr: any) => dataStr ? new Date(dataStr).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Data desconhecida'
-
     // Loop comparando a linha atual com a linha anterior (o mesmo que teu FOR no PHP)
     for (let i = 0; i < rows.length; i++) {
       const atual = rows[i]
       const anterior = rows[i + 1] // Pega o registro mais antigo pra comparar
 
       const itemHistorico = {
-        dataHora: formatarDataHora(atual.dataAlteracao),
+        dataHora: comum.formatarDataHoraBr(atual.dataAlteracao),
         usuario: atual.usuarioAlteracao || 'Sistema',
         alteracoes: [] as any[]
       }
@@ -68,8 +65,8 @@ export default defineEventHandler(async (event) => {
             teveAlteracao = true
             
             if (key === 'dataAdmissao') {
-              valorAtual = formatarData(valorAtual)
-              valorAnterior = formatarData(valorAnterior)
+              valorAtual = comum.formatarDataBr(valorAtual)
+              valorAnterior = comum.formatarDataBr(valorAnterior)
             }
             
             // Regra específica pro Status (Ativo/Inativo)
