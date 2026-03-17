@@ -1,4 +1,5 @@
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useWindowSize } from '@vueuse/core'
 
 export function useFuncionarioListagem() {
   const carregandoTela = ref(false)
@@ -10,6 +11,25 @@ export function useFuncionarioListagem() {
   const modalFiltroAvancadoAberto = ref(false)
   const projetosAtivos = ref<any[]>([])
   const modalExibicaoAberto = ref(false)
+  const { width } = useWindowSize()
+
+  const placeholderDinamico = computed(() => {
+    if (width.value < 640) return 'Digite o nome...'
+    if (width.value < 1024) return 'Digite o nome do func...'
+    return 'Digite o nome do funcionário...'
+  })
+
+  const projetosFormatados = computed(() => {
+    const lista = projetosAtivos.value || []
+    return lista.map(p => ({
+      codigo: p.id || p.codigo,
+      descricao: `${p.apelido} - ${p.descricao}`
+    }))
+  })
+
+  onMounted(() => {
+    carregarProjetos()
+  })
 
   const filtro = reactive({
     nomeParam: '',
@@ -198,6 +218,8 @@ export function useFuncionarioListagem() {
     projetosAtivos,
     carregarProjetos,
     modalExibicaoAberto,
+    placeholderDinamico,
+    projetosFormatados,
     colunas: colunasVisiveis,
     colunasVisiveis,
     labels: labelsColunas,

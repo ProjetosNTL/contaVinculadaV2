@@ -95,22 +95,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
-
 const {
   carregandoTela, carregandoGravacao, carregandoExclusao, modalExclusaoAberto, form, editando,
   projetosAtivos, carregarProjetos, carregarDados, voltarParaLista, limparFormulario,
   abrirModalExclusao, fecharModal, gravarRegistro, excluirRegistro,
-  cpfInvalido, emailInvalido,
+  cpfInvalido, emailInvalido, projetosFormatados,
   modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta 
 } = useFuncionarioFormulario()
-
-const projetosFormatados = computed(() => {
-  return projetosAtivos.value.map(p => ({
-    codigo: p.codigo,
-    label: `${p.apelido} - ${p.descricao}`
-  }))
-})
 
 onMounted(() => { 
   carregarProjetos()

@@ -9,7 +9,7 @@
       <div class="flex flex-col xl:flex-row items-center gap-4">
         <div class="flex-1 w-full text-left">
           <AppInputAutocomplete v-model="filtro.nomeParam" :sugestoes="sugestoesNome" :buscando="buscandoSugestoes"
-            :mostrarMenu="mostrandoSugestoes" placeholder="Digite o nome do funcionário..."
+            :mostrarMenu="mostrandoSugestoes" :placeholder="placeholderDinamico"
             @buscar="buscarSugestoesNome" @selecionar="selecionarSugestao" @fechar="fecharSugestoesDelay"
             @enter="buscarLista" />
         </div>
@@ -157,8 +157,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-
 const {
   carregando, buscaRealizada, visaoAtual, dados, filtro, sugestoesNome, buscandoSugestoes, mostrandoSugestoes,
   buscarSugestoesNome, selecionarSugestao, fecharSugestoesDelay, buscarLista,
@@ -166,15 +164,8 @@ const {
   modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
   modalExibicaoAberto, abrirModalExibicao, carregarProjetos, projetosAtivos,
   colunas, labels, aplicarExibicao, colunasTemp,
+  placeholderDinamico, projetosFormatados,
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useFuncionarioListagem()
-
-const projetosFormatados = computed(() => {
-  const lista = projetosAtivos.value || []
-  return lista.map(p => ({
-    codigo: p.codigo,
-    descricao: `${p.apelido} - ${p.descricao}`
-  }))
-})
 </script>

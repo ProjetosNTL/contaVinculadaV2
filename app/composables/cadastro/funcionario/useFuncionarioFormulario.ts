@@ -40,6 +40,13 @@ export function useFuncionarioFormulario() {
 
   const editando = computed(() => !!form.codigo)
 
+  const projetosFormatados = computed(() => {
+    return projetosAtivos.value.map(p => ({
+      codigo: p.id || p.codigo,
+      label: `${p.apelido} - ${p.descricao}`
+    }))
+  })
+
   const mostrarAlerta = (titulo: string, mensagem: string) => {
     modalAlertaTitulo.value = titulo
     modalAlertaMensagem.value = mensagem
@@ -151,6 +158,7 @@ export function useFuncionarioFormulario() {
     form,
     editando,
     projetosAtivos,
+    projetosFormatados,
     carregarProjetos,
     carregarDados,
     voltarParaLista,
