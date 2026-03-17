@@ -29,6 +29,6 @@ export default defineEventHandler(async (event) => {
     return { status: 'success', data: result.recordset }
   } catch (erro) {
     console.error('Erro listagem saldo funcionário:', erro)
-    return { status: 'failed', message: 'Erro ao buscar no banco de dados.' }
+    return { status: 'failed', mensagem: 'Erro ao buscar no banco de dados.' }
   }
 })
