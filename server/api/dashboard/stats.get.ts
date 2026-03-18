@@ -9,6 +9,7 @@ export default defineEventHandler(async () => {
                 (SELECT COUNT(*) FROM cadastro.Funcionario WHERE ativo = 1) AS funcionariosAtivos,
                 (SELECT COUNT(*) FROM cadastro.Funcionario) AS funcionariosTotal,
                 (SELECT COUNT(*) FROM operacao.baseContracheque) AS totalContracheques,
+                (SELECT COUNT(*) FROM operacao.baseContracheque WHERE statusAprovacao IS NULL) AS pendenciasContracheque,
                 (SELECT COUNT(*) FROM operacao.lancamentoManual) AS totalLancamentosManuais,
                 (SELECT COUNT(*) FROM operacao.lancamentoReembolso) AS totalReembolsos
         `)
@@ -21,19 +22,20 @@ export default defineEventHandler(async () => {
                 funcionariosAtivos: row.funcionariosAtivos ?? 0,
                 funcionariosTotal: row.funcionariosTotal ?? 0,
                 totalContracheques: row.totalContracheques ?? 0,
+                pendenciasContracheque: row.pendenciasContracheque ?? 0,
                 totalLancamentosManuais: row.totalLancamentosManuais ?? 0,
                 totalReembolsos: row.totalReembolsos ?? 0,
             }
         }
     } catch (error: any) {
         console.error('Erro ao buscar estatísticas do dashboard:', error)
-        // Retorna zeros em caso de erro, sem quebrar o dashboard
         return {
             status: 'success',
             data: {
                 funcionariosAtivos: 0,
                 funcionariosTotal: 0,
                 totalContracheques: 0,
+                pendenciasContracheque: 0,
                 totalLancamentosManuais: 0,
                 totalReembolsos: 0,
             }

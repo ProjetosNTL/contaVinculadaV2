@@ -120,20 +120,29 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+      <div class="lg:col-span-2 bg-white dark:bg-[#1e2029] rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm flex flex-col min-h-[400px]">
         <div class="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-800 pb-4">
           <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-            <Icon name="fa7-solid:chart-line" class="text-emerald-500" /> Painel de Resumo
+            <Icon name="fa7-solid:chart-line" class="text-emerald-500" /> Fluxo de Caixa Mensal
           </h3>
-          <button class="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 transition-colors">Ver relatórios</button>
+          <div class="flex items-center gap-3">
+             <div class="flex items-center gap-1.5 text-[10px] font-bold text-gray-400">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Entradas
+                <span class="w-2 h-2 rounded-full bg-rose-500 ml-2"></span> Saídas
+             </div>
+          </div>
         </div>
         
-        <div class="flex flex-col items-center justify-center py-10 text-gray-400 dark:text-gray-500 text-center">
-          <div class="w-20 h-20 bg-gray-50 dark:bg-gray-800/50 rounded-full flex items-center justify-center mb-4 border border-dashed border-gray-200 dark:border-gray-700">
-            <Icon name="fa7-solid:wand-magic-sparkles" class="w-8 h-8 text-gray-300 dark:text-gray-600" />
-          </div>
-          <p class="font-medium text-gray-600 dark:text-gray-300">Aqui nascerá um gráfico bonitão!</p>
-          <p class="text-sm mt-1 max-w-sm">Use este espaço futuramente para colocar um gráfico de lançamentos mensais ou uma lista das últimas 5 aprovações do sistema.</p>
+        <div class="flex-1 min-h-0">
+          <client-only>
+            <apexchart v-if="chartSeries.length > 0" type="area" height="100%" width="100%" :options="chartOptions" :series="chartSeries" />
+            <div v-else class="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 text-center py-10">
+              <div class="w-20 h-20 bg-gray-50 dark:bg-gray-800/50 rounded-full flex items-center justify-center mb-4 border border-dashed border-gray-200 dark:border-gray-700">
+                <Icon name="fa7-solid:wand-magic-sparkles" class="w-8 h-8 text-gray-300 dark:text-gray-600" />
+              </div>
+              <p class="font-medium text-gray-600 dark:text-gray-300">Carregando dados financeiros...</p>
+            </div>
+          </client-only>
         </div>
       </div>
 
@@ -205,6 +214,8 @@ const stats = ref({
   totalReembolsos: 0,
 })
 
+const chartData = ref<any[]>([])
+
 const saudacao = computed(() => {
   const hora = dataAtual.value.getHours()
   if (hora >= 5 && hora < 12) return 'Bom dia'
@@ -221,6 +232,37 @@ const dataCompleta = computed(() => {
 const horaCompleta = computed(() => {
   return dataAtual.value.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 })
+
+// ApexCharts Config
+const chartSeries = computed(() => {
+  if (chartData.value.length === 0) return []
+  return [
+    { name: 'Entradas', data: chartData.value.map(d => d.entradas) },
+    { name: 'Saídas', data: chartData.value.map(d => d.saidas) }
+  ]
+})
+
+const chartOptions = computed(() => ({
+  chart: { type: 'area', toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, sans-serif' },
+  colors: ['#10b981', '#ef4444'],
+  dataLabels: { enabled: false },
+  stroke: { curve: 'smooth', width: 3 },
+  fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0, stops: [0, 95, 100] } },
+  xaxis: {
+    categories: chartData.value.map(d => d.mesAno),
+    axisBorder: { show: false }, axisTicks: { show: false },
+    labels: { style: { colors: '#94a3b8', fontWeight: 700, fontSize: '10px' } }
+  },
+  yaxis: {
+    labels: {
+      style: { colors: '#94a3b8', fontWeight: 700, fontSize: '10px' },
+      formatter: (v: number) => `R$ ${Math.floor(v / 1000)}k`
+    }
+  },
+  grid: { borderColor: 'rgba(148, 163, 184, 0.05)', strokeDashArray: 4 },
+  legend: { show: false },
+  tooltip: { theme: 'dark' }
+}))
 
 onMounted(async () => {
   timerTempo = setInterval(() => {
@@ -239,12 +281,16 @@ onMounted(async () => {
   }
 
   try {
-    const data = await $fetch<any>('/api/dashboard/stats')
-    if (data?.status === 'success') {
-      stats.value = data.data
-    }
+    const [resStats, resChart] = await Promise.all([
+      $fetch<any>('/api/dashboard/stats'),
+      $fetch<any>('/api/dashboard/movimentacaoMensal')
+    ])
+    
+    if (resStats?.status === 'success') stats.value = resStats.data
+    if (resChart?.status === 'success') chartData.value = resChart.data
+
   } catch (e) {
-    console.error('Erro ao buscar stats do dashboard:', e)
+    console.error('Erro ao buscar dados do dashboard:', e)
   } finally {
     loading.value = false
   }
