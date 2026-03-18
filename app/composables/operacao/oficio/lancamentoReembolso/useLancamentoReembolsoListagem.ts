@@ -1,0 +1,193 @@
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useWindowSize } from '@vueuse/core'
+
+export function useLancamentoReembolsoListagem() {
+  const router = useRouter()
+  const carregandoTela = ref(false)
+  const buscaRealizada = ref(false)
+  const visaoAtual = ref<'lista' | 'cards'>('lista')
+  const { width } = useWindowSize()
+
+  // Modais de Detalhes e Funcionários (específicos desta tela)
+  const modalDetalhesAberto = ref(false)
+  const detalhes = ref({ motivo: '', usuarioCadastro: '', dataCadastro: '' })
+  const modalFuncionarioAberto = ref(false)
+  const listaFuncionariosModal = ref<any[]>([])
+
+  // Modal de Exibição (Padrão Ouro)
+  const modalExibicaoAberto = ref(false)
+  
+  const placeholderDinamico = computed(() => {
+    if (width.value < 640) return 'Filtrar por projeto...'
+    return 'Filtrar por projeto ou tipo de movimentação...'
+  })
+
+  const filtro = reactive({
+    projeto: '',
+    tipoMovimentacao: '',
+    dataMovimentacao: '',
+    ativoParam: '1' // Mantendo o padrão de ativos por padrão
+  })
+
+  // Combos
+  const projetos = ref<any[]>([])
+  const tiposMovimentacao = ref<any[]>([])
+
+  // Colunas para exibição dinâmica
+  const colunasVisiveis = reactive({
+    projeto: true,
+    contaVinculada: true,
+    tipoMov: true,
+    dataMov: true,
+    vlrMov: true,
+    dataOficio: true,
+    vlrOficio: true,
+    dataResposta: true,
+    dataEntrada: true,
+    status: true,
+    acoes: true
+  })
+
+  const labelsColunas = {
+    projeto: 'Projeto',
+    contaVinculada: 'Conta Vinculada',
+    tipoMov: 'Tipo Mov.',
+    dataMov: 'Data Mov.',
+    vlrMov: 'Vlr Mov.',
+    dataOficio: 'Data Ofício',
+    vlrOficio: 'Vlr Ofício',
+    dataResposta: 'Data Resposta',
+    dataEntrada: 'Data Entrada',
+    status: 'Status',
+    acoes: 'Ações'
+  }
+
+  const colunasTemp = reactive({ ...colunasVisiveis })
+
+  const listaCompleta = ref<any[]>([])
+  const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
+
+  const carregarCombos = async () => {
+    try {
+      const [resProj, resTipo] = await Promise.all([
+        $fetch<{ data: any[] }>('/api/cadastro/projeto/ativos'),
+        $fetch<any[]>('/api/tabelaBasica/tipoMovimentacao/recupera')
+      ])
+      projetos.value = resProj.data || []
+      tiposMovimentacao.value = resTipo || []
+    } catch (error) {
+      console.error("Erro ao carregar combos", error)
+    }
+  }
+
+  const buscarLista = async () => {
+    carregandoTela.value = true
+    buscaRealizada.value = true
+    try {
+      const response = await $fetch<{ data: any[] }>('/api/operacao/oficio/lancamentoReembolso/listagem', {
+        method: 'POST',
+        body: filtro
+      })
+      listaCompleta.value = response.data || []
+      paginacao.mudarPagina(1)
+    } catch (error) {
+      console.error('Erro na listagem', error)
+      listaCompleta.value = []
+    } finally {
+      carregandoTela.value = false
+    }
+  }
+
+  const filtrar = () => {
+    buscarLista()
+  }
+
+  const abrirModalDetalhes = async (id: number) => {
+    try {
+      const response = await $fetch<any>('/api/operacao/oficio/lancamentoReembolso/detalhes', {
+        method: 'POST',
+        body: { lancamentoReembolso: id }
+      })
+      detalhes.value = response
+      modalDetalhesAberto.value = true
+    } catch (error) {
+      console.error("Erro ao buscar detalhes", error)
+    }
+  }
+
+  const abrirModalFuncionarios = async (id: number) => {
+    try {
+      const response = await $fetch<any[]>('/api/operacao/oficio/lancamentoReembolso/funcionarios', {
+        method: 'POST',
+        body: { lancamentoReembolso: id }
+      })
+      listaFuncionariosModal.value = response || []
+      modalFuncionarioAberto.value = true
+    } catch (error) {
+      console.error("Erro ao buscar funcionários", error)
+    }
+  }
+
+  const gerarPdfOficio = (id: number) => {
+    window.open(`/api/configuracao/parametros/oficio/pdf?codigo=${id}`, '_blank')
+  }
+
+  const novoRegistro = () => router.push('/operacao/oficio/lancamentoReembolso/cadastro?id=0')
+
+  const abrirModalExibicao = () => {
+    Object.assign(colunasTemp, colunasVisiveis)
+    modalExibicaoAberto.value = true
+  }
+
+  const aplicarExibicao = () => {
+    Object.assign(colunasVisiveis, colunasTemp)
+    modalExibicaoAberto.value = false
+  }
+
+  onMounted(() => {
+    carregarCombos()
+    buscarLista()
+  })
+
+  return {
+    carregando: carregandoTela,
+    buscaRealizada,
+    visaoAtual,
+    filtro,
+    projetos,
+    tiposMovimentacao,
+    buscarLista,
+    filtrar,
+    novoRegistro,
+    
+    // Modais específicos
+    modalDetalhesAberto,
+    detalhes,
+    abrirModalDetalhes,
+    modalFuncionarioAberto,
+    listaFuncionariosModal,
+    abrirModalFuncionarios,
+    gerarPdfOficio,
+
+    // Exibição e Colunas
+    modalExibicaoAberto,
+    abrirModalExibicao,
+    aplicarExibicao,
+    colunas: colunasVisiveis,
+    labels: labelsColunas,
+    colunasTemp,
+    placeholderDinamico,
+
+    // Paginação
+    dados: paginacao.listaPaginada,
+    paginaAtual: paginacao.paginaAtual,
+    itensPorPagina: paginacao.itensPorPagina,
+    totalRegistros: paginacao.totalRegistros,
+    totalPaginas: paginacao.totalPaginas,
+    registroInicial: paginacao.registroInicial,
+    registroFinal: paginacao.registroFinal,
+    paginasExibidas: paginacao.paginasExibidas,
+    mudarPagina: paginacao.mudarPagina,
+    mudarItensPorPagina: paginacao.mudarItensPorPagina
+  }
+}
