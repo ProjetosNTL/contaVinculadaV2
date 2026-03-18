@@ -1,183 +1,130 @@
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">
-        <Icon name="fa-solid:upload" class="mr-2" />
-        Importação de Contracheque
-      </h1>
-    </div>
+  <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
 
-    <div class="bg-white rounded-lg shadow-md mb-6 p-4">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 items-end">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Mês/Ano</label>
-          <div class="relative">
-            <Icon name="fa-solid:calendar" class="absolute left-3 top-3 text-gray-400" />
-            <input 
-              v-model="form.ano" 
-              v-maska data-maska="##/####" 
-              placeholder="mm/aaaa" 
-              type="text" 
-              class="w-full border rounded-md p-2 pl-10 text-center" 
-            />
-          </div>
-        </div>
+    <AppCabecalhoPagina 
+      tituloFino="Importação de" 
+      tituloGrosso="Contracheques"
+      descricao="Envie o arquivo TXT de retenções para processamento e aprovação" 
+      icone="fa7-solid:file-arrow-up" 
+    />
 
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Arquivo TXT</label>
-          <input 
-            type="file" 
-            @change="aoSelecionarArquivo" 
-            accept=".txt" 
-            class="w-full border rounded-md p-1.5" 
-          />
-        </div>
+    <AppCartaoFormulario>
+      <AppSobreposicaoCarregamento :carregando="importando" mensagem="Realizando upload e processando arquivo..." />
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Última Importação</label>
-          <div class="relative">
-            <Icon name="fa-solid:calendar" class="absolute left-3 top-3 text-gray-400" />
-            <input 
-              v-model="ultimaImportacao" 
-              type="text" 
-              class="w-full border rounded-md p-2 pl-10 text-center bg-gray-100" 
-              readonly 
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="flex justify-between mt-4">
-      <button @click="abrirModalInfo" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
-        <span>Processamento</span>
-        <Icon name="fa-solid:cogs" class="ml-2" />
-      </button>
-      
-      <button @click="importarArquivo" :disabled="importando" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 flex items-center disabled:opacity-50">
-        <span>{{ importando ? 'Importando...' : 'Importar' }}</span>
-        <Icon v-if="!importando" name="fa-solid:upload" class="ml-2" />
-      </button>
-    </div>
-
-    <AppModal :isOpen="modalInfoAberto" title="Informações de Processamento" @close="modalInfoAberto = false">
-      <div class="p-4 text-center">
-        <h3 class="font-bold text-lg mb-4">SEGUE ABAIXO AS INFORMAÇÕES PARA REALIZAR O PROCESSAMENTO DE UM CONTRACHEQUE:</h3>
+      <form v-if="!importando" @submit.prevent="importarArquivo" class="space-y-12 relative z-0">
         
-        <div class="my-6">
-          <p class="text-green-600 font-bold text-xl mb-1">APROVAR</p>
-          <p class="text-gray-800 font-semibold">Os contracheques selecionados<br> serão APROVADOS e processados.</p>
-        </div>
-        
-        <div class="my-6">
-          <p class="text-red-600 font-bold text-xl mb-1">REPROVAR</p>
-          <p class="text-gray-800 font-semibold">Os contracheques selecionados<br> serão REPROVADOS e processados.</p>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8 mt-6">
+            
+            <div class="md:col-span-12 lg:col-span-8 space-y-8">
+                <AppFormularioSecao icone="fa7-solid:calendar-check">
+                    Informações da Remessa
+                </AppFormularioSecao>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <AppInputTexto v-model="form.ano" label="Mês/Ano de Referência" placeholder="MM/AAAA" v-maska="'##/####'" icone="fa7-solid:calendar-circle-exclamation" required />
+                    
+                    <div class="flex flex-col">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Última Atividade</label>
+                        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-xl flex items-center gap-3">
+                            <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4 text-emerald-500" />
+                            <span class="text-xs font-bold text-gray-700 dark:text-gray-200">{{ ultimaImportacao }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <AppFormularioSecao icone="fa7-solid:file-import">
+                    Arquivo de Retenções
+                </AppFormularioSecao>
+
+                <AppInputArquivo 
+                    v-model="arquivoSelecionado" 
+                    accept=".txt" 
+                    label="Selecione o arquivo .txt gerado pelo RH" 
+                    required 
+                    @change="aoSelecionarArquivo"
+                />
+
+                <div class="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-500/20 rounded-2xl flex gap-3">
+                    <Icon name="fa7-solid:circle-exclamation" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                    <div>
+                        <p class="text-xs font-black text-amber-700 dark:text-amber-400 uppercase tracking-tight">Regras de Formatação</p>
+                        <p class="text-[11px] text-amber-800 dark:text-amber-300/80 leading-relaxed mt-1">O arquivo deve ser formato texto simples (.txt) e conter as colunas de Matrícula, CPF e Verbas conforme o layout padrão da prefeitura. O limite de tamanho é 1MB.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna de Ajuda/Status -->
+            <div class="md:col-span-12 lg:col-span-4">
+                <div class="bg-gray-50/50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-3xl p-6 h-full space-y-6 shadow-inner">
+                    <h4 class="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                        <Icon name="fa7-solid:circle-info" /> Fluxo de Trabalho
+                    </h4>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-black shadow-lg shadow-emerald-500/20">1</div>
+                            <p class="text-xs font-medium text-gray-600 dark:text-gray-400 leading-relaxed">Selecione o período de referência para as retenções.</p>
+                        </div>
+                        <div class="flex items-start gap-4 opacity-70">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-black shadow-lg shadow-emerald-500/20">2</div>
+                            <p class="text-xs font-medium text-gray-600 dark:text-gray-400 leading-relaxed">Suba o arquivo .txt e clique em importar para processar.</p>
+                        </div>
+                        <div class="flex items-start gap-4 opacity-50">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-black shadow-lg shadow-emerald-500/20">3</div>
+                            <p class="text-xs font-medium text-gray-600 dark:text-gray-400 leading-relaxed">Vá para a tela de processamento para conferir e aprovar.</p>
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-gray-200 dark:bg-gray-800"></div>
+
+                    <AppBotao variacao="padrao" icone="fa7-solid:cog" @click="irParaProcessamento" class="w-full">
+                        Ir para Processamento
+                    </AppBotao>
+                </div>
+            </div>
+
         </div>
 
-        <div class="mt-6 flex justify-center gap-4">
-          <button @click="irParaProcessamento" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Ir para Processamento</button>
-          <button @click="modalInfoAberto = false" class="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400">Fechar</button>
+        <AppRodapeFormulario 
+          labelVoltar="Retornar ao Dashboard"
+          labelGravar="Importar Arquivo"
+          iconeGravar="fa7-solid:upload"
+          @voltar="navigateTo('/')"
+          @gravar="importarArquivo"
+        />
+      </form>
+    </AppCartaoFormulario>
+
+    <!-- Modal Pós-Importação -->
+    <AppModal :isOpen="modalImportadosAberto" title="Importação Finalizada" icon="fa7-solid:cloud-check" tamanho="sm" @close="modalImportadosAberto = false" rodapeEntre>
+      <div class="flex flex-col items-center py-6 text-center">
+        <div class="relative mb-6 scale-125">
+            <div class="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full"></div>
+            <div class="relative w-16 h-16 bg-gradient-to-tr from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center shadow-xl">
+                <Icon name="fa7-solid:check" class="w-8 h-8 text-white" />
+            </div>
         </div>
+        
+        <h4 class="text-xl font-black text-gray-900 dark:text-white mb-2">
+          Sucesso!
+        </h4>
+        
+        <p class="text-xs text-gray-500 dark:text-gray-400 font-bold leading-relaxed max-w-[240px]">
+          O arquivo foi importado e processado com êxito. Deseja conferir os dados para aprovação agora?
+        </p>
       </div>
+      <template #footer>
+        <AppBotao variacao="padrao" @click="modalImportadosAberto = false">Depois</AppBotao>
+        <AppBotao variacao="primario" icone="fa7-solid:arrow-right" @click="irParaProcessamento">Sim, processar</AppBotao>
+      </template>
     </AppModal>
 
-    <AppModal :isOpen="modalImportadosAberto" title="Atenção" @close="modalImportadosAberto = false">
-      <div class="p-4 text-center">
-        <p class="text-lg font-semibold mb-6">Importação realizada! Deseja processar os contracheques agora?</p>
-        <div class="flex justify-center gap-4">
-          <button @click="irParaProcessamento" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Sim</button>
-          <button @click="modalImportadosAberto = false" class="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400">Não</button>
-        </div>
-      </div>
-    </AppModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
-const router = useRouter()
-
-const form = ref({
-  ano: ''
-})
-const arquivoSelecionado = ref<File | null>(null)
-const ultimaImportacao = ref('')
-
-const importando = ref(false)
-const modalInfoAberto = ref(false)
-const modalImportadosAberto = ref(false)
-
-const carregarUltimaImportacao = async () => {
-  try {
-    const { data } = await $fetch<{ data: string }>('/api/operacao/contracheque/importacao/ultimaImportacao')
-    ultimaImportacao.value = data || 'Nenhuma importação'
-  } catch (error) {
-    console.error('Erro ao buscar última importação:', error)
-  }
-}
-
-const aoSelecionarArquivo = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  if (target.files && target.files.length > 0) {
-    const file = target.files[0]
-    
-    if (!file) return 
-
-    if (file.size > 1048576) {
-      alert('Atenção: O arquivo ultrapassou o valor máximo permitido (1MB).')
-      target.value = ''
-      arquivoSelecionado.value = null
-      return
-    }
-    
-    if (file.type !== 'text/plain') {
-      alert('Atenção: Tipo de arquivo não suportado. Envie um arquivo TXT.')
-      target.value = ''
-      arquivoSelecionado.value = null
-      return
-    }
-
-    arquivoSelecionado.value = file
-  }
-}
-
-const importarArquivo = async () => {
-  if (!form.value.ano) return alert('Informe o Mês/Ano.')
-  if (!arquivoSelecionado.value) return alert('É necessário enviar um arquivo.')
-
-  importando.value = true
-  const formData = new FormData()
-  formData.append('ano', form.value.ano)
-  formData.append('arquivo', arquivoSelecionado.value)
-
-  try {
-    const res = await $fetch<{ status: string, mensagem: string }>('/api/operacao/contracheque/importacao/upload', {
-      method: 'POST',
-      body: formData
-    })
-
-    if (res.status === 'success') {
-      modalImportadosAberto.value = true
-    } else {
-      alert(res.mensagem)
-    }
-  } catch (error) {
-    console.error('Erro ao importar arquivo:', error)
-    alert('Erro ao realizar a importação do arquivo.')
-  } finally {
-    importando.value = false
-  }
-}
-
-const abrirModalInfo = () => modalInfoAberto.value = true
-
-const irParaProcessamento = () => {
-  modalInfoAberto.value = false
-  modalImportadosAberto.value = false
-  // Rota para a tela de processamento (ajuste o caminho conforme criar a tela)
-  router.push('/operacao/contracheque/processamento') 
-}
-
-carregarUltimaImportacao()
+const {
+  form, arquivoSelecionado, ultimaImportacao, importando, modalImportadosAberto,
+  aoSelecionarArquivo, importarArquivo, irParaProcessamento
+} = useContrachequeImportacao()
 </script>
