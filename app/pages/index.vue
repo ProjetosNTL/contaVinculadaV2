@@ -1,42 +1,42 @@
 <template>
-  <div class="min-h-full flex flex-col gap-6 p-2 md:p-6 animate-fade-in">
-    <div class="relative overflow-hidden rounded-2xl shadow-sm bg-gradient-to-r from-[#22262e] to-[#2c3e50] dark:from-[#1a1c23] dark:to-[#0f172a] p-8 border border-gray-800">
-      <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full border-[30px] border-emerald-500/5 blur-sm pointer-events-none"></div>
-      <div class="absolute -right-10 top-20 w-32 h-32 rounded-full border-[15px] border-[#a8cf45]/10 blur-sm pointer-events-none"></div>
+  <div class="min-h-full flex flex-col gap-6 p-2 md:p-6 animate-fade-in transition-colors duration-500">
+    <div class="relative overflow-hidden rounded-2xl shadow-xl bg-white dark:bg-gradient-to-r dark:from-[#1a1c23] dark:to-[#0f172a] p-8 border border-gray-100 dark:border-gray-800 transition-all duration-500 group">
+      <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full border-[30px] border-emerald-500/5 dark:border-emerald-500/10 blur-sm pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+      <div class="absolute -right-10 top-20 w-32 h-32 rounded-full border-[15px] border-emerald-500/5 dark:border-emerald-500/10 blur-sm pointer-events-none group-hover:-translate-y-4 transition-all duration-700"></div>
       
       <div class="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         
         <div>
-          <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">
-            {{ saudacao }}, <span class="text-emerald-400">{{ userName }}</span>
+          <h2 class="text-3xl md:text-3xl font-black text-gray-900 dark:text-white tracking-tighter mb-2">
+            {{ saudacao }}, <span class="text-emerald-500 dark:text-emerald-400 opacity-90 underline decoration-emerald-200 underline-offset-8">{{ userName }}</span>
           </h2>
-          <p class="text-gray-400 text-sm md:text-base font-medium flex items-center gap-2">
-            <Icon name="fa7-solid:shield-halved" class="text-[#a8cf45]" />
+          <p class="text-gray-500 dark:text-gray-400 text-sm md:text-base font-bold flex items-center gap-2">
+            <Icon name="fa7-solid:shield-halved" class="text-emerald-500" />
             Visão Geral do Sistema Conta Vinculada
           </p>
         </div>
 
-        <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 bg-white/5 backdrop-blur-md rounded-2xl p-4 sm:px-6 border border-white/10 shadow-lg shrink-0 w-full xl:w-auto">
+        <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 bg-gray-50/80 dark:bg-white/5 backdrop-blur-md rounded-2xl p-4 sm:px-6 border border-gray-200/50 dark:border-white/10 shadow-sm shrink-0 w-full xl:w-auto">
           
-          <div class="flex items-center gap-3 sm:border-r border-white/10 sm:pr-5 w-full justify-center sm:justify-start">
-            <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 shadow-inner shrink-0">
-              <Icon name="fa7-solid:calendar-day" class="w-4 h-4 text-emerald-400" />
+          <div class="flex items-center gap-3 sm:border-r border-gray-200 dark:border-white/10 sm:pr-5 w-full justify-center sm:justify-start">
+            <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-inner shrink-0">
+              <Icon name="fa7-solid:calendar-day" class="w-4 h-4 text-emerald-500" />
             </div>
             <div class="text-left">
-              <div class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">Data Atual</div>
-              <div class="text-white font-semibold text-sm whitespace-nowrap">{{ dataCompleta }}</div>
+              <div class="text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-widest mb-0.5">Data Atual</div>
+              <div class="text-gray-900 dark:text-white font-black text-sm whitespace-nowrap">{{ dataCompleta }}</div>
             </div>
           </div>
 
-          <div class="w-full h-px bg-white/10 block sm:hidden"></div>
+          <div class="w-full h-px bg-gray-200 dark:bg-white/10 block sm:hidden"></div>
 
           <div class="flex items-center gap-3 sm:pl-1 w-full justify-center sm:justify-start">
-            <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30 shadow-inner shrink-0">
-              <Icon name="fa7-solid:clock" class="w-4 h-4 text-blue-400" />
+            <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20 shadow-inner shrink-0">
+              <Icon name="fa7-solid:clock" class="w-4 h-4 text-blue-500" />
             </div>
             <div class="text-left">
-              <div class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-0.5">Horário Local</div>
-              <div class="text-white font-bold text-lg tabular-nums tracking-wider">{{ horaCompleta }}</div>
+              <div class="text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-widest mb-0.5">Horário Local</div>
+              <div class="text-gray-900 dark:text-white font-black text-lg tabular-nums tracking-tighter">{{ horaCompleta }}</div>
             </div>
           </div>
 

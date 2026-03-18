@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen w-full bg-[#f3f3f4] dark:bg-[#0f172a] flex flex-col font-sans text-gray-800 dark:text-gray-200 transition-colors duration-300 overflow-hidden">
+  <div class="h-screen w-full bg-slate-50 dark:bg-[#0f172a] flex flex-col font-sans text-gray-800 dark:text-gray-200 transition-colors duration-300 overflow-hidden">
     
     <AppNavbar @toggle-sidebar="collapsed = !collapsed" class="shrink-0" />
 

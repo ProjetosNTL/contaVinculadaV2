@@ -2,19 +2,19 @@
   <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in">
     
     <!-- HEADER HUB -->
-    <div class="relative overflow-hidden rounded-3xl shadow-sm bg-gradient-to-br from-[#1e2029] to-[#2a2d37] dark:from-[#1a1c23] dark:to-[#0f172a] p-6 sm:p-8 border border-gray-200/10 dark:border-gray-800">
-      <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full border-[30px] border-emerald-500/5 blur-sm pointer-events-none"></div>
-      <div class="absolute -right-10 top-20 w-32 h-32 rounded-full border-[15px] border-emerald-500/10 blur-sm pointer-events-none"></div>
+    <div class="relative overflow-hidden rounded-3xl shadow-sm bg-white dark:bg-[#1a1c23] p-6 sm:p-8 border border-gray-100 dark:border-gray-800 transition-all duration-500 group">
+      <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full border-[30px] border-emerald-500/5 dark:border-emerald-500/10 blur-sm pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+      <div class="absolute -right-10 top-20 w-32 h-32 rounded-full border-[15px] border-emerald-500/5 dark:border-emerald-500/10 blur-sm pointer-events-none group-hover:-translate-y-4 transition-all duration-700"></div>
       
       <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="flex flex-col gap-1">
-          <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 shadow-inner">
-              <Icon name="fa7-solid:gears" class="w-6 h-6 text-emerald-400" />
+          <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30 shadow-inner shrink-0 transform group-hover:rotate-6 transition-transform">
+              <Icon name="fa7-solid:gears" class="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
             </div>
-            Central de <span class="text-emerald-400 drop-shadow-md">Configurações</span>
+            Central de <span class="text-emerald-500 dark:text-emerald-400 drop-shadow-md">Configurações</span>
           </h2>
-          <p class="text-gray-400 text-sm md:text-base font-medium flex items-center gap-2 mt-1 sm:ml-16">
+          <p class="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium flex items-center gap-2 mt-1 sm:ml-16 opacity-90">
             Gestão de acessos, parâmetros globais e regras de negócio
           </p>
         </div>
