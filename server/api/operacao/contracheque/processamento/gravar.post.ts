@@ -71,6 +71,6 @@ export default defineEventHandler(async (event) => {
 
     } catch (error: any) {
         console.error('Erro no processamento do contracheque:', error)
-        return { status: 'failed', message: 'Erro ao gravar no banco de dados.' } 
+        return { status: 'failed', mensagem: 'Erro ao gravar no banco de dados.' } 
     }
 })

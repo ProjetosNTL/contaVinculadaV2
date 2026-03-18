@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const codigoContracheque = Number(body.codigoContracheque)
 
-  if (!codigoContracheque) return { status: 'failed', message: 'Código não informado' }
+  if (!codigoContracheque) return { status: 'failed', mensagem: 'Código não informado' }
 
   try {
     const pool = await useDb()
@@ -18,6 +18,6 @@ export default defineEventHandler(async (event) => {
     return { status: 'success', data: result.recordset }
   } catch (erro) {
     console.error('Erro ao buscar detalhes do contracheque:', erro)
-    return { status: 'failed', message: 'Erro ao buscar no banco de dados.' }
+    return { status: 'failed', mensagem: 'Erro ao buscar no banco de dados.' }
   }
 })
