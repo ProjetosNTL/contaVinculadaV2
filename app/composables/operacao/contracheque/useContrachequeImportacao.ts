@@ -12,6 +12,17 @@ export function useContrachequeImportacao() {
   const ultimaImportacao = ref('')
   const importando = ref(false)
   const modalImportadosAberto = ref(false)
+  
+  // Estado para modais de erro/alerta
+  const modalAlertaAberto = ref(false)
+  const modalAlertaTitulo = ref('Atenção')
+  const modalAlertaMensagem = ref('')
+
+  const exibirAlerta = (titulo: string, mensagem: string) => {
+    modalAlertaTitulo.value = titulo
+    modalAlertaMensagem.value = mensagem
+    modalAlertaAberto.value = true
+  }
 
   const carregarUltimaImportacao = async () => {
     try {
@@ -24,7 +35,7 @@ export function useContrachequeImportacao() {
 
   const aoSelecionarArquivo = (file: File) => {
     if (file.size > 1048576) {
-      alert('Atenção: O arquivo ultrapassou o valor máximo permitido (1MB).')
+      exibirAlerta('Arquivo muito grande', 'O arquivo ultrapassou o valor máximo permitido de 1MB.')
       return false
     }
     
@@ -34,8 +45,14 @@ export function useContrachequeImportacao() {
   }
 
   const importarArquivo = async () => {
-    if (!form.ano) return alert('Informe o Mês/Ano de referência.')
-    if (!arquivoSelecionado.value) return alert('É necessário selecionar um arquivo TXT.')
+    // Validação manual para evitar o bubble do browser
+    if (!form.ano || form.ano.length < 7) {
+        return exibirAlerta('Campo Obrigatório', 'Informe o Mês/Ano de referência no formato MM/AAAA.')
+    }
+    
+    if (!arquivoSelecionado.value) {
+        return exibirAlerta('Arquivo não selecionado', 'É necessário selecionar um arquivo .txt para continuar.')
+    }
 
     importando.value = true
     const formData = new FormData()
@@ -51,10 +68,10 @@ export function useContrachequeImportacao() {
       if (res.status === 'success') {
         modalImportadosAberto.value = true
       } else {
-        alert(res.mensagem || 'Erro ao importar.')
+        exibirAlerta('Falha na Importação', res.message || 'Não foi possível processar o arquivo.')
       }
     } catch (error) {
-      alert('Erro ao realizar a importação do arquivo.')
+      exibirAlerta('Erro de Conexão', 'Houve um erro técnico ao tentar enviar o arquivo para o servidor.')
     } finally {
       importando.value = false
     }
@@ -75,6 +92,9 @@ export function useContrachequeImportacao() {
     ultimaImportacao,
     importando,
     modalImportadosAberto,
+    modalAlertaAberto,
+    modalAlertaTitulo,
+    modalAlertaMensagem,
     aoSelecionarArquivo,
     importarArquivo,
     irParaProcessamento

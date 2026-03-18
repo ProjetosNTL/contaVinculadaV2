@@ -11,7 +11,7 @@
             'max-w-4xl': tamanho === 'xl'
           }"
         >
-          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+          <div v-if="!semCabecalho" class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
             <h3 class="text-xl font-bold text-gray-800 dark:text-white tracking-wide flex items-center gap-2">
               <Icon v-if="icon" :name="icon" class="text-emerald-500 w-6 h-6" />
               {{ title }}
@@ -21,7 +21,7 @@
             </button>
           </div>
 
-          <div class="p-6" :class="semScroll ? 'overflow-visible' : 'overflow-y-auto custom-scrollbar'">
+          <div :class="[semCabecalho ? 'p-0' : 'p-6', semScroll ? 'overflow-visible' : 'overflow-y-auto custom-scrollbar']">
             <slot />
           </div>
 
@@ -37,11 +37,12 @@
 <script setup lang="ts">
 defineProps({
   isOpen: { type: Boolean, default: false },
-  title: { type: String, required: true },
+  title: { type: String, default: '' },
   icon: { type: String, default: '' },
   tamanho: { type: String, default: 'md' }, // sm, md, lg, xl
   rodapeEntre: { type: Boolean, default: false },
-  semScroll: { type: Boolean, default: false }
+  semScroll: { type: Boolean, default: false },
+  semCabecalho: { type: Boolean, default: false }
 })
 
 defineEmits(['close'])
