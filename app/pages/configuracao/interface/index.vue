@@ -7,7 +7,7 @@
       :links="[{ label: 'Configurações', to: '/configuracao' }]" 
     />
 
-    <div class="max-w-4xl mx-auto w-full">
+    <div class="w-full">
       <AppCartaoFormulario>
         <div class="p-6 md:p-10 space-y-16">
           
