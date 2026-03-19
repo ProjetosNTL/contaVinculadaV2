@@ -4,7 +4,7 @@
     <AppCabecalhoPagina tituloFino="Extrato" tituloGrosso="Projeto"
       descricao="Visualize saldos e movimentações detalhadas por projeto" icone="fa7-solid:chart-pie" />
 
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual" mostrar-relatorio @excel="gerarExcel" @pdf="gerarPdf">
       <template #entradas>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end w-full">
           <AppSelect v-model="filtro.projetoParam" label="Filtrar por Projeto" :opcoes="projetosAtivos.map(p => ({ codigo: p.codigo, descricao: `${p.apelido} - ${p.descricao}` }))" />
@@ -20,7 +20,10 @@
         <AppBotao variacao="padrao" icone="fa7-solid:user-tag" @click="navigateTo('/operacao/movimentacaoBancaria/extratoFuncionario')">
           Ir para Extrato Funcionário
         </AppBotao>
-        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarLista">
+      </template>
+
+      <template #acoes-pesquisa>
+        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
           Atualizar Saldos
         </AppBotao>
       </template>
@@ -70,7 +73,7 @@
           ]" 
           @ver-detalhes="abrirModalExtrato(item.codigoProjeto)">
           <template #footer-actions>
-             <AppBotao variacao="primario" icone="fa7-solid:chart-line" class="flex-1" @click="abrirModalExtrato(item.codigoProjeto)">Ver Extrato</AppBotao>
+             <AppBotao variacao="acao" icone="fa7-solid:chart-line" class="flex-1" @click="abrirModalExtrato(item.codigoProjeto)">Ver Extrato</AppBotao>
           </template>
         </AppCardListagem>
       </template>
@@ -100,4 +103,12 @@ const {
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useExtratoProjetoListagem()
+
+const gerarExcel = () => {
+    alert('📊 Gerando extrato de projetos (Excel)...')
+}
+
+const gerarPdf = () => {
+    alert('📄 Gerando extrato de projetos (PDF)...')
+}
 </script>

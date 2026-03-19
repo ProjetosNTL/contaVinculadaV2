@@ -1,153 +1,78 @@
 <template>
   <div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">
-    <AppCabecalhoPagina 
-      tituloFino="Tabela Básica de" 
-      tituloGrosso="Status"
-      descricao="Gerencie os diferentes status de processamento do sistema" 
-      icone="fa7-solid:spinner" 
-    />
+
+    <AppCabecalhoPagina tituloFino="Tabela de" tituloGrosso="Status"
+      descricao="Gerenciamento de estados e situações dos registros" icone="fa7-solid:toggle-on" />
 
     <AppBarraFerramentas v-model:visao-atual="visaoAtual">
       <template #entradas>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end w-full">
-          <div class="md:col-span-8">
-            <AppInputTexto v-model="filtro.descricao" label="Descrição" placeholder="Digite a descrição..." icone="fa7-solid:tag" />
-          </div>
-          <div class="md:col-span-4">
-            <AppSelecaoStatus v-model="filtro.ativo" />
-          </div>
-        </div>
+        <AppInputTexto v-model="filtro.descricao" placeholder="Buscar status..." icone="fa7-solid:magnifying-glass"
+          @enter="buscarLista" />
+        <AppSelecaoStatus v-model="filtro.ativo" />
       </template>
 
       <template #acoes-principais>
-        <AppBotao variacao="primario" icone="fa7-solid:plus" @click="novoRegistro">
-          Novo Registro
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/tabelaBasica/status/cadastro')">
+          Novo Status
         </AppBotao>
-        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarStatus">
-          Pesquisar
+      </template>
+
+      <template #acoes-pesquisa>
+        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
+          Pesquisar Status
         </AppBotao>
       </template>
     </AppBarraFerramentas>
 
-    <AppContainerListagem 
-      :carregando="carregando" 
-      :buscaRealizada="true" 
-      :lista="listaStatus"
-      :visaoAtual="visaoAtual" 
-      @mudarPagina="() => {}"
-    >
+    <AppContainerListagem :carregando="carregando" :buscaRealizada="buscaRealizada" :lista="dados || []"
+      :visaoAtual="visaoAtual" @mudarPagina="mudarPagina">
+
       <template #cabecalho-tabela>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Descrição</th>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          Código</th>
+        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          Descrição do Status</th>
+        <th scope="col"
+          class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+          Status no Sistema</th>
       </template>
 
       <template #linhas-tabela="{ item }">
-        <td class="px-6 py-4 font-bold text-sm text-gray-900 dark:text-white">{{ item.descricao }}</td>
-        <td class="px-6 py-4 text-center">
-            <AppAtivo :ativo="item.ativo === 1" />
+         <td class="px-6 py-4">
+          <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ item.codigo_status }}</span>
         </td>
-        <td class="px-6 py-4 text-center">
-          <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all" title="Ver Histórico">
-            <Icon name="fa7-solid:clock-rotate-left" class="w-5 h-5" />
-          </button>
-        </td>
-        <td class="px-6 py-4 text-right">
-          <NuxtLink :to="`/tabelaBasica/status/cadastro?id=${item.codigo}`" class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all inline-block" title="Editar">
-            <Icon name="fa7-solid:pen-to-square" class="w-5 h-5" />
+        <td class="px-6 py-4">
+          <NuxtLink :to="`/tabelaBasica/status/cadastro?codigo=${item.codigo}`" class="flex items-center gap-3 group">
+            <span
+              class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+              {{ item.descricao }}
+            </span>
           </NuxtLink>
+        </td>
+        <td class="px-6 py-4 text-center">
+          <AppAtivo :ativo="item.ativo" />
         </td>
       </template>
 
       <template #cards="{ item }">
-        <AppCardListagem 
-          :titulo="item.descricao" 
-          :subtituloNome="'Cód'" 
-          :subtituloValor="item.codigo"
-          :ativo="item.ativo === 1"
-          @ver-detalhes="navigateTo(`/tabelaBasica/status/cadastro?id=${item.codigo}`)"
-          @clique-titulo="navigateTo(`/tabelaBasica/status/cadastro?id=${item.codigo}`)"
-        >
-            <template #actions-extra>
-                <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 rounded-lg transition-colors border border-gray-100 dark:border-gray-800" title="Histórico">
-                    <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
-                </button>
-            </template>
-        </AppCardListagem>
+        <AppCardListagem :titulo="item.descricao" :subtituloNome="'Cód'" :subtituloValor="item.codigo_status"
+          :ativo="item.ativo" :mostrarStatus="true"
+          @ver-detalhes="navigateTo(`/tabelaBasica/status/cadastro?codigo=${item.codigo}`)"
+          @clique-titulo="navigateTo(`/tabelaBasica/status/cadastro?codigo=${item.codigo}`)" />
       </template>
+
     </AppContainerListagem>
 
-    <AppModalHistorico 
-      :aberto="modalHistoricoAberto" 
-      :historico="historicoData" 
-      @close="modalHistoricoAberto = false" 
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
-const router = useRouter()
 const visaoAtual = ref('lista')
+const buscaRealizada = ref(true)
 const carregando = ref(false)
-const filtroAberto = ref(true)
+const dados = ref<any[]>([])
+const filtro = ref({ descricao: '', ativo: 1 })
 
-const filtro = ref({
-  descricao: '',
-  ativo: '1'
-})
-
-interface StatusObj {
-  codigo: number
-  descricao: string
-  ativo: number
-}
-
-const listaStatus = ref<StatusObj[]>([])
-const modalHistoricoAberto = ref(false)
-const historicoData = ref<any[]>([])
-
-const buscarStatus = async () => {
-  carregando.value = true
-  try {
-    const response = await $fetch<{ data: StatusObj[] }>('/api/tabelaBasica/status/listagem', {
-      method: 'POST',
-      body: filtro.value
-    })
-    listaStatus.value = response.data || []
-  } catch (error) {
-    console.error('Erro ao buscar status:', error)
-  } finally {
-    carregando.value = false
-  }
-}
-
-const abrirHistorico = async (id: number) => {
-  try {
-    const response = await $fetch<{ data: any[] }>('/api/tabelaBasica/status/historico', {
-      method: 'POST',
-      body: { status: id }
-    })
-    
-    // Mapeio os dados para o formato esperado pelo componente AppModalHistorico
-    historicoData.value = (response.data || []).map(h => ({
-      dataHora: h.dataAlteracao,
-      usuario: h.usuarioAlteracao,
-      alteracoes: h.alteracoes.map((st: string) => ({
-        tipo: 'texto',
-        mensagem: st
-      }))
-    }))
-    
-    modalHistoricoAberto.value = true
-  } catch (error) {
-    console.error('Erro ao buscar histórico:', error)
-  }
-}
-
-const novoRegistro = () => router.push('/tabelaBasica/status/cadastro?id=0')
-
-buscarStatus()
+const mudarPagina = (p: number) => { }
+const buscarLista = () => { }
 </script>

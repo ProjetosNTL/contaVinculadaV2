@@ -8,7 +8,7 @@
       icone="fa7-solid:file-invoice-dollar" 
     />
 
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual" mostrar-relatorio @excel="gerarExcel" @pdf="gerarPdf">
       <template #entradas>
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end w-full">
           <div class="md:col-span-5">
@@ -48,10 +48,13 @@
       </template>
 
       <template #acoes-principais>
-        <AppBotao variacao="primario" icone="fa7-solid:file-circle-plus" @click="novoRegistro">
+        <AppBotao variacao="acao" icone="fa7-solid:file-circle-plus" @click="novoRegistro">
           Novo Lançamento
         </AppBotao>
-        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarLista">
+      </template>
+
+      <template #acoes-pesquisa>
+        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
           Pesquisar Lançamentos
         </AppBotao>
       </template>
@@ -161,7 +164,7 @@
           </div>
       </div>
       <template #footer>
-          <AppBotao variacao="primario" @click="modalDetalhesAberto = false" class="w-full">Fechar Detalhes</AppBotao>
+          <AppBotao variacao="padrao" @click="modalDetalhesAberto = false" class="w-full">Fechar Detalhes</AppBotao>
       </template>
     </AppModal>
 
@@ -188,7 +191,7 @@
         </div>
       </div>
       <template #footer>
-          <AppBotao variacao="primario" @click="modalFuncionarioAberto = false" class="w-full">Fechar</AppBotao>
+          <AppBotao variacao="padrao" @click="modalFuncionarioAberto = false" class="w-full">Fechar</AppBotao>
       </template>
     </AppModal>
 
@@ -213,4 +216,12 @@ const {
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useLancamentoReembolsoListagem()
+
+const gerarExcel = () => {
+    alert('📊 Gerando relatório de reembolsos (Excel)...')
+}
+
+const gerarPdf = () => {
+    alert('📄 Gerando PDF dos reembolsos...')
+}
 </script>

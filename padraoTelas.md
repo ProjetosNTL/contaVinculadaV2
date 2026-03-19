@@ -13,8 +13,8 @@ Este documento é a referência definitiva para a criação de novas telas no si
    - Telas de **Cadastro** (`cadastro.vue`): **OBRIGATÓRIO** o uso de `AppBarraNavegacao` no topo.
    - Telas de **Processo/Wizards**: Usam `AppTrilhaNavegacao` (ex: telas que não são CRUDs puros).
 3. **Barra de Ferramentas Obrigatória**: Em telas de **Listagem**, é **PROIBIDO** escrever o HTML manual para a área de busca e filtros. Deve-se usar obrigatoriamente o componente `AppBarraFerramentas`. A linha inferior deve ser dividida em dois slots:
-   - `#acoes-principais`: Para botões de criação (ex: "Novo Registro") à esquerda. O botão de **Relatório** aparecerá automaticamente ao lado destes se habilitado.
-   - `#acoes-pesquisa`: Para o botão de "Pesquisar" à direita, garantindo o equilíbrio visual da barra.
+   - `#acoes-principais`: Para botões de criação (ex: "Novo Registro") à esquerda, usando `variacao="acao"` (Azul). O botão de **Relatório** aparecerá automaticamente ao lado destes se habilitado.
+   - `#acoes-pesquisa`: Para o botão de "Pesquisar" à direita usando `variacao="acao"` (Azul), garantindo o equilíbrio visual da barra.
 4. **Grid System**: Sempre usar `md:grid-cols-12` com `gap-x-6 gap-y-8`. Nunca use grids genéricos (`cols-3`) para manter o alinhamento vertical dos labels.
 5. **Reuso de Componentes**: O desenvolvedor (IA ou Humano) deve **SEMPRE** analisar a pasta `app/components/global/` antes de criar qualquer elemento visual. É proibido usar tags HTML puras (`input`, `select`, `button`) quando houver um componente `App` correspondente (ex: `AppInputTexto`, `AppSelect`, `AppBotao`).
 
@@ -29,9 +29,10 @@ Uma tela de listagem padrão deve seguir a anatomia do arquivo [funcionario/inde
 2. **Cabeçalho**: `AppCabecalhoPagina` com título fino/grosso e ícone representativo.
 3. **Barra de Ferramentas**: Usar obrigatoriamente `AppBarraFerramentas` passando as props e slots necessários:
    - `v-model:visaoAtual`: Para sincronizar o alternador Lista/Cards.
-   - `#entradas`: `AppInputAutocomplete` e `AppSelecaoStatus`.
+   - `#entradas`: `AppInputAutocomplete`, `AppInputTexto` e `AppSelecaoStatus`.
    - `#acoes-secundarias`: Botões de `Exibição` e `Filtros Avançados`.
-   - `#acoes-principais`: Botões `Novo Registro` (primário) e `Pesquisar`.
+   - `#acoes-principais`: Botão `Novo Registro` (`variacao="acao"`).
+   - `#acoes-pesquisa`: Botão `Pesquisar` (`variacao="acao"`).
 
 ### 1.2 Componentes de Exibição
 - **Tabela**:

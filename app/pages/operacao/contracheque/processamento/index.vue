@@ -8,7 +8,7 @@
       icone="fa7-solid:gears" 
     />
 
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual" mostrar-relatorio @excel="gerarExcel" @pdf="gerarPdf">
       <template #entradas>
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end w-full">
           <div class="md:col-span-3">
@@ -39,11 +39,11 @@
       </template>
 
       <template #acoes-principais>
-        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarProcessamentos">Consultar</AppBotao>
+        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarProcessamentos">Consultar</AppBotao>
         
         <template v-if="filtro.status === '2' && dados.length > 0">
             <div class="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-1 hidden sm:block"></div>
-            <AppBotao variacao="sucesso" icone="fa7-solid:check-double" @click="processarContracheque(1)">
+            <AppBotao variacao="primario" icone="fa7-solid:check-double" @click="processarContracheque(1)">
                 Aprovar
             </AppBotao>
             <AppBotao variacao="perigo" icone="fa7-solid:ban" @click="processarContracheque(0)">
@@ -338,4 +338,12 @@ const {
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useContrachequeProcessamento()
+
+const gerarExcel = () => {
+    alert('📊 Gerando relatório de processamento (Excel)...')
+}
+
+const gerarPdf = () => {
+    alert('📄 Gerando espelho de processamento (PDF)...')
+}
 </script>

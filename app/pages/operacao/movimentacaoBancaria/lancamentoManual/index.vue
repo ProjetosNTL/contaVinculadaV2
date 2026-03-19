@@ -4,7 +4,7 @@
     <AppCabecalhoPagina tituloFino="Lançamento" tituloGrosso="Manual"
       descricao="Gerencie movimentações bancárias manuais e vinculações com funcionários" icone="fa7-solid:file-invoice-dollar" />
 
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual" mostrar-relatorio @excel="gerarExcel" @pdf="gerarPdf">
       <template #entradas>
         <AppInputAutocomplete 
           v-model="filtro.nomeParam" 
@@ -26,10 +26,13 @@
       </template>
 
       <template #acoes-principais>
-        <AppBotao variacao="primario" icone="fa7-solid:plus" @click="novoRegistro">
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="novoRegistro">
           Novo Lançamento
         </AppBotao>
-        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarLista">
+      </template>
+
+      <template #acoes-pesquisa>
+        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
           Pesquisar Lançamentos
         </AppBotao>
       </template>
@@ -179,4 +182,12 @@ const {
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useLancamentoManualListagem()
+
+const gerarExcel = () => {
+    alert('📊 Gerando relatório de lançamentos manuais (Excel)...')
+}
+
+const gerarPdf = () => {
+    alert('📄 Gerando PDF dos lançamentos manuais...')
+}
 </script>

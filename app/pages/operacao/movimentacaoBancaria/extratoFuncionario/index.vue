@@ -4,7 +4,7 @@
     <AppCabecalhoPagina tituloFino="Extrato" tituloGrosso="Funcionário"
       descricao="Visualize saldos e movimentações detalhadas por colaborador" icone="fa7-solid:user-check" />
 
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual" mostrar-relatorio @excel="gerarExcel" @pdf="gerarPdf">
       <template #entradas>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end w-full">
           <AppSelect v-model="filtro.funcionarioParam" label="Filtrar por Funcionário" :opcoes="funcionariosAtivos.map(f => ({ codigo: f.codigo, descricao: f.nomeCompleto }))" />
@@ -20,7 +20,10 @@
         <AppBotao variacao="padrao" icone="fa7-solid:chart-pie" @click="navigateTo('/operacao/movimentacaoBancaria/extratoProjeto')">
           Ir para Extrato Projeto
         </AppBotao>
-        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarLista">
+      </template>
+
+      <template #acoes-pesquisa>
+        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
           Atualizar Saldos
         </AppBotao>
       </template>
@@ -74,7 +77,7 @@
           ]" 
           @ver-detalhes="abrirModalExtrato(item.codigoFuncionario)">
           <template #footer-actions>
-             <AppBotao variacao="primario" icone="fa7-solid:user-tag" class="flex-1" @click="abrirModalExtrato(item.codigoFuncionario)">Ver Extrato</AppBotao>
+             <AppBotao variacao="acao" icone="fa7-solid:user-tag" class="flex-1" @click="abrirModalExtrato(item.codigoFuncionario)">Ver Extrato</AppBotao>
           </template>
         </AppCardListagem>
       </template>
@@ -104,4 +107,12 @@ const {
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useExtratoFuncionarioListagem()
+
+const gerarExcel = () => {
+    alert('📊 Gerando extrato consolidado (Excel)...')
+}
+
+const gerarPdf = () => {
+    alert('📄 Gerando extrato consolidado (PDF)...')
+}
 </script>
