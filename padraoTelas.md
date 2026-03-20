@@ -17,6 +17,10 @@ Este documento é a referência definitiva para a criação de novas telas no si
    - `#acoes-pesquisa`: Lado **DIREITO**. Reservado exclusivamente para o botão de **Pesquisar** (`variacao="acao"`), garantindo o equilíbrio visual "nas extremidades" da barra.
 4. **Grid System**: Sempre usar `md:grid-cols-12` com `gap-x-6 gap-y-8`. Nunca use grids genéricos (`cols-3`) para manter o alinhamento vertical dos labels.
 5. **Reuso de Componentes**: O desenvolvedor (IA ou Humano) deve **SEMPRE** analisar a pasta `app/components/global/` antes de criar qualquer elemento visual. É proibido usar tags HTML puras (`input`, `select`, `button`) quando houver um componente `App` correspondente (ex: `AppInputTexto`, `AppSelect`, `AppBotao`).
+6. **Regra de Busca Ativa (Zero Auto-Load)**: É **PROIBIDO** que as telas de listagem carreguem dados automaticamente (`onMounted`) sem filtros definidos. A listagem deve iniciar vazia e só exibir resultados após:
+   - O usuário digitar no `AppInputAutocomplete` e **selecionar um item** da lista.
+   - O usuário preencher filtros e clicar explicitamente no botão **Pesquisar**.
+   - **Exceção**: Apenas se o usuário vier de um link direto com parâmetros de busca na URL (`route.query`).
 
 ---
 
