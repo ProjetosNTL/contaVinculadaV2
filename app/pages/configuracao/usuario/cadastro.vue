@@ -196,8 +196,8 @@
                     :itensPorPagina="itensPorPaginaProjetos"
                     :paginasExibidas="paginasExibidasProjetos"
                     class="mb-0"
-                    @mudarPagina="pag => paginaProjetos = pag"
-                    @mudarItensPorPagina="qtd => { itensPorPaginaProjetos = qtd; paginaProjetos = 1 }"
+                    @mudarPagina="mudarPaginaProjetos"
+                    @mudarItensPorPagina="mudarItensPorPaginaProjetos"
                 >
                     <template #cabecalho-tabela>
                         <th class="p-5 w-16 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Sel.</th>
@@ -307,7 +307,7 @@ const {
   filtroProjetos, projetosPaginados, projetosFiltrados, paginaProjetos, 
   totalPaginasProjetos, itensPorPaginaProjetos, registroInicialProjetos,
   registroFinalProjetos, paginasExibidasProjetos, todosProjetosMarcados, 
-  marcarDesmarcarTodosProjetos
+  marcarDesmarcarTodosProjetos, mudarPaginaProjetos, mudarItensPorPaginaProjetos
 } = useUsuarioFormulario()
 
 const pwdVisible = ref(false)

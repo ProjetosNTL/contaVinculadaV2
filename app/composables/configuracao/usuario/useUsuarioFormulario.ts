@@ -1,6 +1,19 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+export interface UsuarioForm {
+    codigo: number;
+    nomeUsuario: string;
+    cpf: string;
+    telefone: string;
+    email: string;
+    login: string;
+    senha?: string;
+    restauraSenha: number;
+    projetos: number[];
+    ativo: number;
+}
+
 export function useUsuarioFormulario() {
   const route = useRoute()
   const router = useRouter()
@@ -24,7 +37,8 @@ export function useUsuarioFormulario() {
   const modalSucessoAberto = ref(false)
   const erros = ref(new Set<string>())
 
-  const form = reactive({
+
+  const form = reactive<UsuarioForm>({
     codigo: codigoRaw ? parseInt(codigoRaw as string) : 0,
     nomeUsuario: '',
     cpf: '',
@@ -40,10 +54,8 @@ export function useUsuarioFormulario() {
   const senhaConfirma = ref('')
   const projetosAtivos = ref<any[]>([])
   
-  // Paginação e Filtro de Projetos (Igual Importar Bancos)
+  // Paginação e Filtro de Projetos
   const filtroProjetos = ref('')
-  const paginaProjetos = ref(1)
-  const itensPorPaginaProjetos = ref(10)
 
   const projetosFiltrados = computed(() => {
     if (!filtroProjetos.value) return projetosAtivos.value
@@ -54,52 +66,17 @@ export function useUsuarioFormulario() {
     )
   })
 
-  const projetosPaginados = computed(() => {
-    const inicio = (paginaProjetos.value - 1) * itensPorPaginaProjetos.value
-    const fim = inicio + itensPorPaginaProjetos.value
-    return projetosFiltrados.value.slice(inicio, fim)
-  })
+  // Hook padrão Ouro de paginação
+  const visaoProjetos = ref<'lista'>('lista')
+  const paginacaoProjetos = usePaginacaoFrontEnd(projetosFiltrados, visaoProjetos)
 
-  const totalPaginasProjetos = computed(() => Math.ceil(projetosFiltrados.value.length / itensPorPaginaProjetos.value))
-
-  const registroInicialProjetos = computed(() => {
-    if (projetosFiltrados.value.length === 0) return 0
-    return (paginaProjetos.value - 1) * itensPorPaginaProjetos.value + 1
-  })
-
-  const registroFinalProjetos = computed(() => {
-    return Math.min(paginaProjetos.value * itensPorPaginaProjetos.value, projetosFiltrados.value.length)
-  })
-
-  const paginasExibidasProjetos = computed(() => {
-    const paginas: (number | string)[] = []
-    const maxBotoes = 5
-    const total = totalPaginasProjetos.value
-    const atual = paginaProjetos.value
-
-    if (total <= maxBotoes) {
-      for (let i = 1; i <= total; i++) paginas.push(i)
-    } else {
-      paginas.push(1)
-      let inicio = Math.max(2, atual - 1)
-      let fim = Math.min(total - 1, atual + 1)
-      if (atual <= 3) fim = 4
-      else if (atual >= total - 2) inicio = total - 3
-      if (inicio > 2) paginas.push('...')
-      for (let i = inicio; i <= fim; i++) paginas.push(i)
-      if (fim < total - 1) paginas.push('...')
-      paginas.push(total)
-    }
-    return paginas
+  watch(filtroProjetos, () => {
+    paginacaoProjetos.mudarPagina(1)
   })
 
   const todosProjetosMarcados = computed(() => {
-    if (projetosPaginados.value.length === 0) return false
-    return projetosPaginados.value.every(p => form.projetos.includes(p.codigo))
-  })
-
-  watch(filtroProjetos, () => {
-    paginaProjetos.value = 1
+    if (paginacaoProjetos.listaPaginada.value.length === 0) return false
+    return paginacaoProjetos.listaPaginada.value.every((p: any) => form.projetos.includes(p.codigo))
   })
 
   const carregarProjetos = async () => {
@@ -194,7 +171,7 @@ export function useUsuarioFormulario() {
 
   const marcarDesmarcarTodosProjetos = () => {
     const marcar = !todosProjetosMarcados.value
-    projetosPaginados.value.forEach(p => {
+    paginacaoProjetos.listaPaginada.value.forEach((p: any) => {
         const index = form.projetos.indexOf(p.codigo)
         if (marcar && index === -1) {
             form.projetos.push(p.codigo)
@@ -265,7 +242,7 @@ export function useUsuarioFormulario() {
     senhaConfirma.value = ''
     passoAtual.value = 1
     filtroProjetos.value = ''
-    paginaProjetos.value = 1
+    paginacaoProjetos.mudarPagina(1)
   }
 
   const voltarParaLista = () => {
@@ -303,15 +280,17 @@ export function useUsuarioFormulario() {
     
     // Paginação e Filtros
     filtroProjetos,
-    projetosPaginados,
+    projetosPaginados: paginacaoProjetos.listaPaginada,
     projetosFiltrados,
-    paginaProjetos,
-    totalPaginasProjetos,
-    itensPorPaginaProjetos,
-    registroInicialProjetos,
-    registroFinalProjetos,
-    paginasExibidasProjetos,
+    paginaProjetos: paginacaoProjetos.paginaAtual,
+    totalPaginasProjetos: paginacaoProjetos.totalPaginas,
+    itensPorPaginaProjetos: paginacaoProjetos.itensPorPagina,
+    registroInicialProjetos: paginacaoProjetos.registroInicial,
+    registroFinalProjetos: paginacaoProjetos.registroFinal,
+    paginasExibidasProjetos: paginacaoProjetos.paginasExibidas,
     todosProjetosMarcados,
+    mudarPaginaProjetos: paginacaoProjetos.mudarPagina,
+    mudarItensPorPaginaProjetos: paginacaoProjetos.mudarItensPorPagina,
     marcarDesmarcarTodosProjetos,
 
     carregarProjetos,
