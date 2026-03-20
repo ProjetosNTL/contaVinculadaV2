@@ -6,9 +6,17 @@
 
     <AppBarraFerramentas v-model:visao-atual="visaoAtual">
       <template #entradas>
-        <AppInputTexto v-model="filtro.nome" label="USUÁRIO" placeholder="Buscar por usuário..." icone="fa7-solid:magnifying-glass"
-          @enter="buscarLista" />
-        <AppSelecaoStatus v-model="filtro.ativo" label="STATUS" />
+        <AppInputAutocomplete 
+          v-model="filtro.nome" 
+          :placeholder="placeholderDinamico"
+          @enter="buscarLista" 
+        />
+        <AppSelecaoStatus v-model="filtro.ativo" />
+      </template>
+
+      <template #acoes-secundarias>
+        <AppBotao variacao="padrao" icone="fa7-solid:table-columns" @click="abrirModalExibicao">Exibição</AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:filter" @click="abrirModalFiltroAvancado">Filtros Avançados</AppBotao>
       </template>
 
       <template #acoes-principais>
@@ -19,7 +27,7 @@
 
       <template #acoes-pesquisa>
         <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
-          Pesquisar
+          Pesquisar Usuários
         </AppBotao>
       </template>
     </AppBarraFerramentas>
@@ -42,31 +50,35 @@
 
       <template #cabecalho-tabela>
         <th scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Usuário</th>
-        <th scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Login</th>
-        <th scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
-        <th scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Histórico</th>
+        <th v-show="colunas.login" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Login</th>
+        <th v-show="colunas.cpf" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">CPF</th>
+        <th v-show="colunas.status" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
+        <th v-show="colunas.historico" scope="col" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Histórico</th>
       </template>
 
       <template #linhas-tabela="{ item }">
         <td class="p-4">
           <NuxtLink :to="`/configuracao/usuario/cadastro?codigo=${item.codigo}`" class="flex items-center gap-3 group">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all">
-              {{ item.nome.charAt(0).toUpperCase() }}
+            <div class="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-base shrink-0 group-hover:bg-emerald-500/20 transition-all">
+              {{ (item.nome || 'U').charAt(0).toUpperCase() }}
             </div>
-            <span class="text-sm font-bold text-gray-800 dark:text-gray-200 truncate group-hover:text-emerald-500 transition-colors uppercase">
+            <span class="text-base font-bold text-gray-800 dark:text-gray-200 truncate group-hover:text-emerald-500 transition-colors uppercase">
               {{ item.nome }}
             </span>
           </NuxtLink>
         </td>
-        <td class="p-4 text-xs font-medium text-gray-500 dark:text-gray-400 italic">
+        <td v-show="colunas.login" class="p-4 text-base font-bold text-gray-500 dark:text-gray-400">
           {{ item.login }}
         </td>
-        <td class="p-4 text-center">
+        <td v-show="colunas.cpf" class="p-4 text-base font-bold text-gray-500 dark:text-gray-400">
+          {{ item.cpf }}
+        </td>
+        <td v-show="colunas.status" class="p-4 text-center">
           <AppAtivo :ativo="item.ativo" />
         </td>
-        <td class="p-4 text-center text-center">
+        <td v-show="colunas.historico" class="p-4 text-center">
           <div class="flex items-center justify-center">
-            <button @click="verHistorico" 
+            <button @click.stop="abrirHistorico(item.codigo)" 
               class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Ver Histórico">
               <Icon name="fa6-solid:clock-rotate-left" class="w-5 h-5" />
             </button>
@@ -76,11 +88,36 @@
 
       <template #cards="{ item }">
         <AppCardListagem :titulo="item.nome" :subtituloNome="'Login'" :subtituloValor="item.login" :ativo="item.ativo"
-          :mostrarStatus="true" @ver-detalhes="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)"
+          :mostrarStatus="colunas.status" :mostrarHistorico="colunas.historico" 
+          :detalhes="[
+            ...(colunas.cpf ? [{ icone: 'fa7-solid:address-card', texto: `CPF: ${item.cpf}` }] : []),
+            ...(colunas.login ? [{ icone: 'fa7-solid:id-badge', texto: `Login: ${item.login}` }] : [])
+          ]"
+          @ver-detalhes="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)"
+          @ver-historico="abrirHistorico(item.codigo)"
           @clique-titulo="navigateTo(`/configuracao/usuario/cadastro?codigo=${item.codigo}`)" />
       </template>
 
     </AppContainerListagem>
+
+    <AppModalHistorico :aberto="modalHistoricoAberto" :historico="historicoSelecionado"
+      :carregando="carregandoHistorico" @close="modalHistoricoAberto = false" />
+
+    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false"
+      @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
+      <AppInputTexto v-model="filtro.login" label="LOGIN" placeholder="Digite o login..." />
+      <AppInputCpf v-model="filtro.cpf" label="CPF" />
+      <AppSelect 
+        v-model="filtro.projeto" 
+        label="PROJETO" 
+        placeholder="Selecione o projeto..." 
+        :opcoes="[{ codigo: '', descricao: 'Todos os Projetos' }, ...projetosFormatados]" 
+        class="md:col-span-2"
+      />
+    </AppModalFiltroAvancado>
+
+    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" 
+      @aplicar="aplicarExibicao" @close="modalExibicaoAberto = false" />
 
   </div>
 </template>
@@ -90,10 +127,10 @@ const {
   carregando, buscaRealizada, visaoAtual, filtro, buscarLista, filtrar,
   dados, paginaAtual, itensPorPagina, totalRegistros, totalPaginas,
   registroInicial, registroFinal, paginasExibidas,
-  mudarPagina, mudarItensPorPagina
+  mudarPagina, mudarItensPorPagina,
+  modalExibicaoAberto, abrirModalExibicao, aplicarExibicao, colunas, labels, colunasTemp,
+  modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
+  modalHistoricoAberto, abrirHistorico, historicoSelecionado, carregandoHistorico,
+  projetosFormatados, placeholderDinamico
 } = useUsuarioListagem()
-
-const verHistorico = () => {
-    alert('📜 Ver Histórico...')
-}
 </script>

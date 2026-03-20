@@ -16,6 +16,7 @@ export function useUsuarioListagem() {
     login: '',
     nome: '',
     cpf: '',
+    projeto: '',
     ativo: '1'
   })
 
@@ -24,7 +25,7 @@ export function useUsuarioListagem() {
     nome: true,
     cpf: true,
     status: true,
-    acoes: true
+    historico: true
   })
 
   const labelsColunas = {
@@ -32,7 +33,7 @@ export function useUsuarioListagem() {
     nome: 'Nome Completo',
     cpf: 'CPF',
     status: 'Status',
-    acoes: 'Ações'
+    historico: 'Histórico'
   }
 
   const colunasTemp = reactive({ ...colunasVisiveis })
@@ -61,6 +62,53 @@ export function useUsuarioListagem() {
     buscarLista()
   }
 
+  // Projetos
+  const projetosAtivos = ref<any[]>([])
+  const projetosFormatados = computed(() => {
+    return projetosAtivos.value.map(p => ({
+        codigo: p.id || p.codigo,
+        descricao: `${p.apelido} - ${p.descricao}`
+    }))
+  })
+  const carregarProjetos = async () => {
+    try {
+        const data = await $fetch<any>('/api/cadastro/projeto/ativos')
+        projetosAtivos.value = data?.data || data || []
+    } catch (e) { console.error(e) }
+  }
+
+  // Filtro Avançado
+  const modalFiltroAvancadoAberto = ref(false)
+  const abrirModalFiltroAvancado = () => modalFiltroAvancadoAberto.value = true
+  const limparFiltrosAvancados = () => {
+    Object.assign(filtro, {
+      login: '',
+      nome: '',
+      cpf: '',
+      ativo: '1'
+    })
+    buscarLista()
+  }
+  const aplicarFiltroAvancado = () => {
+    modalFiltroAvancadoAberto.value = false
+    buscarLista()
+  }
+
+  // Histórico
+  const modalHistoricoAberto = ref(false)
+  const carregandoHistorico = ref(false)
+  const historicoSelecionado = ref<any[]>([])
+  const abrirHistorico = async (codigo: number) => {
+    modalHistoricoAberto.value = true
+    carregandoHistorico.value = true
+    try {
+        // Implementação futura da API de histórico
+        historicoSelecionado.value = []
+    } finally {
+        carregandoHistorico.value = false
+    }
+  }
+
   const modalExibicaoAberto = ref(false)
   const abrirModalExibicao = () => {
     Object.assign(colunasTemp, colunasVisiveis)
@@ -73,7 +121,7 @@ export function useUsuarioListagem() {
   }
 
   onMounted(() => {
-    // Regra de Busca Ativa (Zero Auto-Load): Não buscar automaticamente
+    carregarProjetos()
   })
 
   return {
@@ -92,6 +140,17 @@ export function useUsuarioListagem() {
     colunas: colunasVisiveis,
     labels: labelsColunas,
     colunasTemp,
+
+    // Filtros e Histórico
+    modalFiltroAvancadoAberto,
+    abrirModalFiltroAvancado,
+    limparFiltrosAvancados,
+    aplicarFiltroAvancado,
+    modalHistoricoAberto,
+    carregandoHistorico,
+    historicoSelecionado,
+    abrirHistorico,
+    projetosFormatados,
 
     // Paginação
     dados: paginacao.listaPaginada,

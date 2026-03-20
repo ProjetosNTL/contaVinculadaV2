@@ -90,16 +90,16 @@
           </div>
 
           <div v-if="totalPaginas > 1" class="flex items-center bg-white dark:bg-[#15171e] border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden divide-x divide-gray-200 dark:divide-gray-700">
-            <button @click="$emit('mudarPagina', paginaAtual - 1)" :disabled="paginaAtual === 1"
+            <button type="button" @click="$emit('mudarPagina', paginaAtual - 1)" :disabled="paginaAtual === 1"
               class="px-3 sm:px-4 py-2 text-sm font-bold transition-colors"
               :class="paginaAtual === 1 ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed bg-gray-50 dark:bg-gray-800/50' : 'text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400'">Anterior</button>
             <template v-for="(pag, index) in paginasExibidas" :key="index">
-              <button v-if="pag !== '...'" @click="$emit('mudarPagina', Number(pag))"
+              <button type="button" v-if="pag !== '...'" @click="$emit('mudarPagina', Number(pag))"
                 class="px-3.5 py-2 text-sm font-bold transition-colors"
                 :class="pag === paginaAtual ? 'bg-emerald-500 text-white cursor-default' : 'text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400'">{{ pag }}</button>
               <div v-else class="px-3 py-2 text-sm font-bold text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800/20 cursor-default">...</div>
             </template>
-            <button @click="$emit('mudarPagina', paginaAtual + 1)" :disabled="paginaAtual === totalPaginas"
+            <button type="button" @click="$emit('mudarPagina', paginaAtual + 1)" :disabled="paginaAtual === totalPaginas"
               class="px-3 sm:px-4 py-2 text-sm font-bold transition-colors"
               :class="paginaAtual === totalPaginas ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed bg-gray-50 dark:bg-gray-800/50' : 'text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400'">Próximo</button>
           </div>
