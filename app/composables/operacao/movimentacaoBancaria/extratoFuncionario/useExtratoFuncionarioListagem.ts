@@ -10,11 +10,13 @@ export function useExtratoFuncionarioListagem() {
   
   const modalFiltroAvancadoAberto = ref(false)
   const modalExibicaoAberto = ref(false)
+  
+  const sugestoesNome = ref<string[]>([])
+  const buscandoSugestoes = ref(false)
+  const mostrandoSugestoes = ref(false)
 
-  const placeholderDinamico = computed(() => {
-    if (width.value < 640) return 'Buscar funcionário...'
-    return 'Digite o nome ou CPF...'
-  })
+  const projetosAtivos = ref<any[]>([])
+  const funcionariosAtivos = ref<any[]>([])
 
   const filtro = reactive({
     nomeParam: '', // Termo de busca principal
@@ -30,32 +32,46 @@ export function useExtratoFuncionarioListagem() {
     acoes: true
   })
 
+  const colunasTemp = reactive({ ...colunasVisiveis })
+
+  const listaCompleta = ref<any[]>([])
+  
+  // Lógica do Modal de Extrato
+  const modalExtratoAberto = ref(false)
+  const funcionarioSelecionado = ref<number | undefined>(undefined)
+
+  // Paginação Front-End
+  const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
+
+  const placeholderDinamico = computed(() => {
+    if (width.value < 640) return 'Buscar funcionário...'
+    return 'Digite o nome ou CPF...'
+  })
+
+  const projetosFormatados = computed(() => {
+    return projetosAtivos.value.map(p => ({
+      codigo: p.codigo || p.id,
+      descricao: p.descricao ? `${p.apelido} - ${p.descricao}` : p.apelido
+    }))
+  })
+
   const labelsColunas = {
     funcionario: 'Funcionário',
     cpf: 'CPF',
     projeto: 'Projeto',
     saldo: 'Saldo Atual',
-    acoes: 'Ações'
+    acoes: 'Extrato'
   }
-
-  const colunasTemp = reactive({ ...colunasVisiveis })
-
-  const listaCompleta = ref<any[]>([])
-  
-  // Paginação Front-End
-  const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
-
-  const projetosAtivos = ref<any[]>([])
-  const funcionariosAtivos = ref<any[]>([])
 
   const carregarCombos = async () => {
     try {
-      const [resProj, resFunc] = await Promise.all([
-        $fetch<{ data: any[] }>('/api/cadastro/projeto/ativos'),
-        $fetch<{ data: any[] }>('/api/cadastro/funcionario/ativos')
-      ])
-      projetosAtivos.value = resProj.data || []
-      funcionariosAtivos.value = resFunc.data || []
+      // Carrega projetos de forma resiliente
+      const resProj = await $fetch<any>('/api/cadastro/projeto/ativos').catch(() => [])
+      projetosAtivos.value = resProj?.data || resProj || []
+      
+      // Carrega funcionários (se necessário para autocomplete futuro)
+      const resFunc = await $fetch<any>('/api/cadastro/funcionario/ativos').catch(() => [])
+      funcionariosAtivos.value = resFunc?.data || resFunc || []
     } catch (error) {
        console.error("Erro combos extrato funcionario", error)
     }
@@ -101,9 +117,16 @@ export function useExtratoFuncionarioListagem() {
     modalExibicaoAberto.value = false
   }
 
-  // Lógica do Modal de Extrato
-  const modalExtratoAberto = ref(false)
-  const funcionarioSelecionado = ref<number | undefined>(undefined)
+  const buscarSugestoesNome = () => {
+     // Mock ou busca real se houver endpoint. 
+     // Por agora, apenas toggle para ver o funcionamento no template.
+  }
+  const selecionarSugestao = (val: string) => { 
+    filtro.nomeParam = val
+    mostrandoSugestoes.value = false
+    buscarLista() 
+  }
+  const fecharSugestoesDelay = () => { setTimeout(() => { mostrandoSugestoes.value = false }, 200) }
 
   const abrirModalExtrato = (id: number) => {
     funcionarioSelecionado.value = id
@@ -114,7 +137,6 @@ export function useExtratoFuncionarioListagem() {
 
   onMounted(() => {
     carregarCombos()
-    buscarLista()
   })
 
   return {
@@ -136,6 +158,14 @@ export function useExtratoFuncionarioListagem() {
     aplicarExibicao,
     projetosAtivos,
     funcionariosAtivos,
+    projetosFormatados,
+    
+    sugestoesNome,
+    buscandoSugestoes,
+    mostrandoSugestoes,
+    buscarSugestoesNome,
+    selecionarSugestao,
+    fecharSugestoesDelay,
     
     // Extrato
     modalExtratoAberto,
