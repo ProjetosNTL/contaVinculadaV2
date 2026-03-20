@@ -83,12 +83,18 @@
       <div v-if="!collapsed" class="menu-header mt-2">Configurações</div>
       <div v-else class="menu-divider"></div>
 
-      <NuxtLink to="/configuracao" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Ajustes do Sistema' : ''">
-        <Icon name="fa7-solid:screwdriver-wrench" class="menu-icon text-emerald-500" />
-        <span v-if="!collapsed" class="menu-text font-bold">Central de Ajustes</span>
+      <NuxtLink to="/configuracao" 
+        class="menu-link group" 
+        :class="{ 'menu-active': $route.path.startsWith('/configuracao') || $route.path.startsWith('/seguranca') }" 
+        :title="collapsed ? 'Central de Configurações' : ''">
+        <Icon name="fa7-solid:screwdriver-wrench" class="menu-icon" />
+        <span v-if="!collapsed" class="menu-text">Central de Configurações</span>
       </NuxtLink>
 
-      <NuxtLink to="/tabelaBasica" class="menu-link group" active-class="menu-active" :title="collapsed ? 'Tabelas Básicas' : ''">
+      <NuxtLink to="/tabelaBasica" 
+        class="menu-link group" 
+        :class="{ 'menu-active': $route.path.startsWith('/tabelaBasica') }" 
+        :title="collapsed ? 'Tabelas Básicas' : ''">
         <Icon name="fa7-solid:database" class="menu-icon" />
         <span v-if="!collapsed" class="menu-text">Tabelas Básicas</span>
       </NuxtLink>
