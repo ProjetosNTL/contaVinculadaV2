@@ -1,23 +1,40 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+export interface OficioForm {
+    codigo: string;
+    projeto: string;
+    texto: string;
+}
+
 export function useParametrosOficioFormulario() {
   const route = useRoute()
   const router = useRouter()
-  
-  const idRaw = route.query.id as string
-  const idSet = !!idRaw && idRaw !== '0'
+  const idRaw = computed(() => (route.query.id || route.query.codigo) as string)
+  const idSet = computed(() => !!idRaw.value && idRaw.value !== '0')
   
   const carregandoTela = ref(false)
   const salvando = ref(false)
   const modalExclusaoAberto = ref(false)
 
-  // Controle de Passos (Padrão Ouro)
-  const passoAtual = ref(1)
-  const totalPassos = 2
+  const erros = ref(new Set<string>())
+  const modalAlertaAberto = ref(false)
+  const modalAlertaTitulo = ref('')
+  const modalAlertaMensagem = ref('')
+  const modalSucessoAberto = ref(false)
 
-  const form = reactive({
-    codigo: idRaw || '0',
+  const mostrarAlerta = (titulo: string, mensagem: string) => {
+    modalAlertaTitulo.value = titulo
+    modalAlertaMensagem.value = mensagem
+    modalAlertaAberto.value = true
+  }
+
+  const fecharModalAlerta = () => {
+    modalAlertaAberto.value = false
+  }
+
+  const form = reactive<OficioForm>({
+    codigo: '0',
     projeto: '',
     texto: ''
   })
@@ -26,27 +43,32 @@ export function useParametrosOficioFormulario() {
 
   const carregarProjetos = async () => {
     try {
-      const projResponse = await $fetch<any>('/api/tabelaBasica/projeto/listarAtivos')
-      projetos.value = projResponse.data || []
+      const projResponse = await $fetch<any>('/api/cadastro/projeto/ativos')
+      projetos.value = (projResponse.data || []).map((p: any) => ({
+        ...p,
+        codigo: String(p.codigo),
+        nomeExibicao: p.descricao ? `${p.apelido} - ${p.descricao}` : p.apelido
+      }))
     } catch (error) {
       console.error('Erro ao carregar projetos:', error)
     }
   }
 
   const carregarDados = async () => {
-    if (idSet) {
+    if (idSet.value) {
       carregandoTela.value = true
       try {
         const { data } = await $fetch<any>('/api/configuracao/parametros/oficio/recupera', {
           method: 'POST',
-          body: { id: idRaw }
+          body: { id: idRaw.value }
         })
         if (data) {
-          form.projeto = data.projeto
+          form.codigo = String(data.codigo)
+          form.projeto = data.projeto ? String(data.projeto) : ''
           form.texto = data.texto
         }
       } catch (error) {
-        console.error('Erro ao carregar dados:', error)
+        mostrarAlerta('Erro Sincronismo', 'Falha ao buscar os dados do ofício. Tente novamente.')
       } finally {
         carregandoTela.value = false
       }
@@ -54,7 +76,7 @@ export function useParametrosOficioFormulario() {
   }
 
   const buscarModeloPadrao = async () => {
-    if (!form.projeto || idSet) return
+    if (!form.projeto || idSet.value) return
     
     try {
       const { data } = await $fetch<any>('/api/configuracao/parametros/oficio/recuperaModelo', {
@@ -69,30 +91,16 @@ export function useParametrosOficioFormulario() {
     }
   }
 
-  const avancarPasso = () => {
-    // Validações por etapa
-    if (passoAtual.value === 1) {
-        if (!form.projeto) return alert("Informe o Projeto")
-    }
-
-    if (passoAtual.value < totalPassos) {
-        passoAtual.value++
-    } else {
-        gravar()
-    }
-  }
-
-  const voltarPasso = () => {
-    if (passoAtual.value > 1) {
-        passoAtual.value--
-    } else {
-        voltar()
-    }
-  }
-
   const gravar = async () => {
-    if (!form.projeto) return alert("Informe o Projeto")
-    if (!form.texto) return alert("A redação não pode estar vazia")
+    erros.value.clear()
+
+    if (!form.projeto) erros.value.add("projeto")
+    if (!form.texto) erros.value.add("texto")
+
+    if (erros.value.size > 0) {
+        mostrarAlerta("Campos Obrigatórios", "Por favor, preencha todos os campos destacados em vermelho.")
+        return
+    }
 
     salvando.value = true
     try {
@@ -101,12 +109,12 @@ export function useParametrosOficioFormulario() {
         body: form
       })
       if (res.status === 'success') {
-        voltar()
+        modalSucessoAberto.value = true
       } else {
-        alert(res.mensagem || 'Erro ao gravar.')
+        mostrarAlerta('Erro ao registrar', res.mensagem || 'Erro desconhecido.')
       }
     } catch (error) {
-      alert('Erro ao gravar dados.')
+      mostrarAlerta('Erro de Servidor', 'Ocorreu um erro na requisição de gravação.')
     } finally {
       salvando.value = false
     }
@@ -120,7 +128,7 @@ export function useParametrosOficioFormulario() {
       })
       voltar()
     } catch (error) {
-      alert('Erro ao excluir.')
+      mostrarAlerta('Erro de Exclusão', 'Não foi possível excluir o parâmetro.')
     } finally {
       modalExclusaoAberto.value = false
     }
@@ -141,23 +149,27 @@ export function useParametrosOficioFormulario() {
     '$nomeOrgao$', '$cnpj$', '$enderecoCompleto$', '$numContrato$', '$numeroOficio$', '$anoOficio$', '$assunto$', '$periodoReferencia$', '$valor$', '$valorExtenso$', '$cidadeData$'
   ]
 
-  onMounted(() => {
-    carregarProjetos()
-    carregarDados()
+  onMounted(async () => {
+    carregandoTela.value = true
+    await carregarProjetos()
+    await carregarDados()
+    carregandoTela.value = false
   })
 
   return {
     carregandoTela,
     salvando,
     modalExclusaoAberto,
-    passoAtual,
-    totalPassos,
-    avancarPasso,
-    voltarPasso,
     form,
     projetos,
     ehEdicao: idSet,
     variaveis,
+    erros,
+    modalAlertaAberto,
+    modalAlertaTitulo,
+    modalAlertaMensagem,
+    modalSucessoAberto,
+    fecharModalAlerta,
     carregarProjetos,
     carregarDados,
     buscarModeloPadrao,

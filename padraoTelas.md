@@ -53,10 +53,13 @@ Use a trindade nativa do sistema:
 | :--- | :--- |
 | `AppInputAutocomplete` | Busca principal no header de telas de Listagem. |
 | `AppInputCpf` / `Cnpj` / `Cep` | Inputs mascarados e validados por regras de negócio nativas. |
-| `AppSelect` | Listas de seleção (Sempre passe props `itemValue="codigo"` e `itemLabel="descricao"`). |
+| `AppSelect` | Listas de seleção (Sempre passe props `itemValue="codigo"` e `itemLabel="descricao"`). **Extra**: Selects vinculados a "Projetos" exigem formatação rica (`itemLabel="nomeExibicao"`). |
 | `AppBotao` | Use variações engessadas: `acao` (azul), `primario` (verde/gravar), `perigo` (vermelho/inativar). |
 | `AppSobreposicaoCarregamento` | Layer de opacidade durante qualquer `$fetch` crítico p/ a UI que renderiza dados lidos. |
 | `AppAtivo` | Exibe pills do sistema com o status "Ativo/Inativo" usando cores padronizadas. |
+
+> [!TIP]
+> **Formatação Estrita de Combos (Projetos)**: Sempre que buscar listas de projetos (`/api/cadastro/projeto/ativos`) para alimentar um `<AppSelect>`, você é proibido de exibir apenas a sigla. Intercepte o fetching usando `.map()` e crie uma propriedade virtual concatenada `nomeExibicao: p.descricao ? \`\${p.apelido} - \${p.descricao}\` : p.apelido` vinculando-a à property `itemLabel` do componente correspondente.
 
 ---
 

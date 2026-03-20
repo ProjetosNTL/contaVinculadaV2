@@ -23,11 +23,11 @@
           </div>
           
           <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">ff
               <slot></slot>
             </div>
           </div>
-
+ 
           <div class="p-5 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row justify-between items-center bg-gray-50 dark:bg-gray-900/30 gap-4 rounded-b-2xl">
             <button @click="$emit('limpar')" class="flex items-center gap-2 text-sm font-bold text-red-500 hover:text-red-400 transition-colors">
               <Icon name="fa7-solid:trash-can" /> Limpar Filtros
@@ -37,13 +37,13 @@
               <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="$emit('aplicar')">Consultar</AppBotao>
             </div>
           </div>
-
+ 
         </div>
       </div>
     </Transition>
   </Teleport>
 </template>
-
+ 
 <script setup lang="ts">
 defineProps({ aberto: Boolean })
 defineEmits(['close', 'limpar', 'aplicar'])

@@ -5,13 +5,17 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   
   let query = `
-    SELECT PO.codigo, CP.apelido, CP.descricao as projeto FROM configuracao.parametroOficio PO
+    SELECT PO.codigo, CP.apelido, CP.descricao as projeto, PO.saldoOficio FROM configuracao.parametroOficio PO
     LEFT JOIN cadastro.projeto CP ON CP.codigo = PO.projeto 
     WHERE PO.projeto IS NOT NULL
   `
 
   if (body.projetoNome) {
     query += ` AND CP.descricao LIKE '%${body.projetoNome}%'`
+  }
+
+  if (body.comSaldo !== undefined && body.comSaldo !== null && body.comSaldo !== '') {
+    query += ` AND PO.saldoOficio = ${Number(body.comSaldo)}`
   }
 
   try {

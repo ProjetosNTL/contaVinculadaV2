@@ -6,11 +6,46 @@ export function useParametrosOficioListagem() {
   const visaoAtual = ref<'lista' | 'cards'>('lista')
 
   const filtro = reactive({
-    projetoNome: ''
+    projetoNome: '',
+    comSaldo: ''
   })
 
   const listaCompleta = ref<any[]>([])
   const paginacao = usePaginacaoFrontEnd(listaCompleta, visaoAtual)
+
+  // Controle de colunas e Exibição
+  const colunasVisiveis = reactive({
+    projeto: true,
+    comSaldo: true,
+    historico: true
+  })
+  const colunasTemp = reactive({ ...colunasVisiveis })
+  const labelsColunas = {
+    projeto: 'Nome do Projeto',
+    comSaldo: 'Contém Saldo',
+    historico: 'Histórico de Alterações'
+  }
+  const modalExibicaoAberto = ref(false)
+  const abrirModalExibicao = () => {
+    Object.assign(colunasTemp, colunasVisiveis)
+    modalExibicaoAberto.value = true
+  }
+  const aplicarExibicao = () => {
+    Object.assign(colunasVisiveis, colunasTemp)
+    modalExibicaoAberto.value = false
+  }
+
+  // Filtros Avançados
+  const modalFiltroAvancadoAberto = ref(false)
+  const abrirModalFiltroAvancado = () => modalFiltroAvancadoAberto.value = true
+  const limparFiltrosAvancados = () => {
+    Object.assign(filtro, { projetoNome: '', comSaldo: '' })
+    buscarLista()
+  }
+  const aplicarFiltroAvancado = () => {
+    modalFiltroAvancadoAberto.value = false
+    buscarLista()
+  }
 
   const buscarLista = async () => {
     carregando.value = true
@@ -30,86 +65,32 @@ export function useParametrosOficioListagem() {
 
   // Histórico
   const modalHistoricoAberto = ref(false)
+  const carregandoHistorico = ref(false)
   const historicoData = ref<any[]>([])
   const abrirHistorico = async (id: number) => {
+    modalHistoricoAberto.value = true
+    carregandoHistorico.value = true
     try {
       const response = await $fetch<any>('/api/configuracao/parametros/oficio/historico', {
         method: 'POST', body: { parametroOficio: id }
       })
-      historicoData.value = response.data || []
-      modalHistoricoAberto.value = true
+      
+      // Mapeamento para o padrão esperado pelo componente AppModalHistorico
+      historicoData.value = (response.data || []).map((item: any) => ({
+        ...item,
+        usuario: item.usuarioAlteracao,
+        dataHora: item.dataAlteracao,
+        alteracoes: (item.alteracoes || []).map((alt: any) => {
+          if (typeof alt === 'string') return { mensagem: alt }
+          return alt
+        })
+      }))
     } catch (error) {
       console.error('Erro ao buscar histórico', error)
-    }
-  }
-
-  // Redação Padrão
-  const modalPadraoAberto = ref(false)
-  const salvandoPadrao = ref(false)
-  const padrao = reactive({ tipoSaldo: '1', texto: '' })
-  const variaveis = [
-    { codigo: '$cidadeData$', desc: 'Cidade/Data' },
-    { codigo: '$nomeOrgao$', desc: 'Nome do Órgão' },
-    { codigo: '$enderecoCompleto$', desc: 'Endereço' },
-    { codigo: '$numContrato$', desc: 'Nº Contrato' },
-    { codigo: '$numeroOficio$', desc: 'Nº Ofício' },
-    { codigo: '$anoOficio$', desc: 'Ano Atual' },
-    { codigo: '$assunto$', desc: 'Assunto' },
-    { codigo: '$cnpj$', desc: 'CNPJ' },
-    { codigo: '$periodoReferencia$', desc: 'Mês/Ano' },
-    { codigo: '$signatarioNome$', desc: 'Quem assina' },
-    { codigo: '$setor$', desc: 'Setor Resp.' },
-    { codigo: '$valor$', desc: 'Valor (R$)' },
-    { codigo: '$valorExtenso$', desc: 'Valor Extenso' }
-  ]
-
-  const carregarModeloPadrao = async () => {
-    try {
-      const res = await $fetch<any>('/api/configuracao/parametros/oficio/recuperaPadrao', {
-        method: 'POST',
-        body: { tipoSaldo: Number(padrao.tipoSaldo) }
-      })
-      padrao.texto = res.data || ''
-    } catch (error) {
-      console.error('Erro ao buscar modelo padrão', error)
-      padrao.texto = ''
-    }
-  }
-
-  const abrirModalPadrao = async () => {
-    padrao.tipoSaldo = '1'
-    await carregarModeloPadrao()
-    modalPadraoAberto.value = true
-  }
-
-  const gravarModeloPadrao = async () => {
-    if (!padrao.texto) return alert("O texto padrão não pode ficar vazio.")
-    salvandoPadrao.value = true
-    try {
-      const res = await $fetch<any>('/api/configuracao/parametros/oficio/gravaPadrao', {
-        method: 'POST',
-        body: padrao
-      })
-      if (res.status === 'success') {
-        modalPadraoAberto.value = false
-      } else {
-        alert(res.mensagem)
-      }
-    } catch (error) {
-      alert("Erro ao gravar modelo padrão.")
     } finally {
-      salvandoPadrao.value = false
+      carregandoHistorico.value = false
     }
   }
-
-  const copiarVariavel = (texto: string) => {
-    navigator.clipboard.writeText(texto)
-    // No "Ouro" geralmente usamos um toast, mas manterei o alert simples ou removerei se o usuário preferir
-  }
-
-  onMounted(() => {
-    buscarLista()
-  })
 
   return {
     carregando,
@@ -118,20 +99,18 @@ export function useParametrosOficioListagem() {
     filtro,
     buscarLista,
     
+    // Filtros e Exibição
+    modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
+    modalExibicaoAberto, abrirModalExibicao, aplicarExibicao,
+    colunas: colunasVisiveis, colunasTemp, labels: labelsColunas,
+    
     // Histórico
     modalHistoricoAberto,
+    carregandoHistorico,
     historicoData,
     abrirHistorico,
 
-    // Redação Padrão
-    modalPadraoAberto,
-    salvandoPadrao,
-    padrao,
-    variaveis,
-    carregarModeloPadrao,
-    abrirModalPadrao,
-    gravarModeloPadrao,
-    copiarVariavel,
+
 
     // Paginação
     dados: paginacao.listaPaginada,

@@ -10,27 +10,30 @@
 
     <AppBarraFerramentas v-model:visao-atual="visaoAtual">
       <template #entradas>
-        <div class="w-full">
-          <AppInputTexto 
-            v-model="filtro.projetoNome" 
-            label="Buscar por Projeto" 
-            placeholder="Digite o nome do projeto para filtrar..." 
-            icone="fa7-solid:magnifying-glass"
-          />
-        </div>
+        <AppInputTexto 
+          v-model="filtro.projetoNome" 
+          placeholder="Digite o nome do projeto para filtrar..." 
+          icone="fa7-solid:magnifying-glass"
+          @enter="buscarLista"
+        />
       </template>
 
       <template #acoes-secundarias>
-        <AppBotao variacao="padrao" icone="fa7-solid:pen-nib" @click="abrirModalPadrao">
+        <AppBotao variacao="padrao" icone="fa7-solid:table-columns" @click="abrirModalExibicao">Exibição</AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:filter" @click="abrirModalFiltroAvancado">Filtros Avançados</AppBotao>
+      </template>
+
+      <template #acoes-principais>
+        <AppBotao variacao="acao" icone="fa7-solid:plus" @click="navigateTo('/configuracao/parametros/oficio/cadastro?id=0')">
+            Novo Registro
+        </AppBotao>
+        <AppBotao variacao="padrao" icone="fa7-solid:pen-nib" @click="navigateTo('/configuracao/parametros/oficio/padrao')">
           Redação Padrão
         </AppBotao>
       </template>
 
-      <template #acoes-principais>
-        <AppBotao variacao="primario" icone="fa7-solid:plus" @click="navigateTo('/configuracao/parametros/oficio/cadastro?id=0')">
-            Novo Registro
-        </AppBotao>
-        <AppBotao variacao="primario" icone="fa7-solid:magnifying-glass" @click="buscarLista">
+      <template #acoes-pesquisa>
+        <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
           Pesquisar
         </AppBotao>
       </template>
@@ -52,27 +55,33 @@
       @mudarItensPorPagina="mudarItensPorPagina"
     >
       <template #cabecalho-tabela>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Projeto</th>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
-        <th scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>
+        <th v-if="colunas.projeto" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Projeto</th>
+        <th v-if="colunas.comSaldo" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Com Saldo</th>
+        <th v-if="colunas.historico" scope="col" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Histórico</th>
       </template>
 
       <template #linhas-tabela="{ item }">
-        <td class="px-6 py-4">
-          <NuxtLink :to="`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`" class="text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:underline transition-all">
-            {{ item.apelido }} - {{ item.projeto }}
+        <td v-if="colunas.projeto" class="px-6 py-4 max-w-[350px]">
+          <NuxtLink :to="`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-sm shrink-0 group-hover:bg-emerald-500/20 transition-all shadow-sm">
+              {{ item.apelido ? item.apelido.charAt(0).toUpperCase() : 'P' }}
+            </div>
+            <div class="flex flex-col min-w-0 justify-center">
+              <span class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                {{ item.projeto ? `${item.apelido} - ${item.projeto}` : item.apelido }}
+              </span>
+            </div>
           </NuxtLink>
         </td>
-        <td class="px-6 py-4 text-center">
-          <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-all" title="Ver Histórico">
-            <Icon name="fa7-solid:clock-rotate-left" class="w-5 h-5" />
-          </button>
+        <td v-if="colunas.comSaldo" class="px-6 py-4 text-center">
+          <span v-if="item.saldoOficio" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-500/20 shadow-sm">Sim</span>
+          <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 border border-red-500/20 shadow-sm">Não</span>
         </td>
-        <td class="px-6 py-4 text-right">
-          <div class="flex items-center justify-end gap-2">
-            <NuxtLink :to="`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`" class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Editar">
-              <Icon name="fa7-solid:pen-to-square" class="w-5 h-5" />
-            </NuxtLink>
+        <td v-if="colunas.historico" class="px-6 py-4 text-center">
+          <div class="flex items-center justify-center">
+            <button @click.stop="abrirHistorico(item.codigo)" class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Ver Histórico">
+              <Icon name="fa6-solid:clock-rotate-left" class="w-5 h-5" />
+            </button>
           </div>
         </td>
       </template>
@@ -80,108 +89,45 @@
       <template #cards="{ item }">
         <AppCardListagem 
           :titulo="item.apelido" 
-          :subtituloNome="item.projeto" 
-          :subtituloValor="`Cód: ${item.codigo}`"
+          :subtituloNome="'Projeto'" 
+          :subtituloValor="item.projeto"
           :ativo="true"
+          :mostrarHistorico="colunas.historico"
           :detalhes="[
-            { icone: 'fa7-solid:calendar-lines', texto: 'Personalizado por Projeto' }
+            { icone: 'fa7-solid:barcode', texto: `Cód: ${item.codigo}` }
           ]" 
           @ver-detalhes="navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`)" 
+          @ver-historico="abrirHistorico(item.codigo)"
           @clique-titulo="navigateTo(`/configuracao/parametros/oficio/cadastro?id=${item.codigo}`)" 
         >
-            <template #actions-extra>
-                <button @click="abrirHistorico(item.codigo)" class="p-2 text-gray-400 hover:text-blue-500 rounded-lg transition-colors border border-gray-100 dark:border-gray-800" title="Histórico">
-                    <Icon name="fa7-solid:clock-rotate-left" class="w-4 h-4" />
-                </button>
-            </template>
         </AppCardListagem>
       </template>
     </AppContainerListagem>
 
-    <!-- Modal Redação Padrão -->
-    <AppModal :isOpen="modalPadraoAberto" title="Editar Redação Padrão" icon="fa7-solid:pen-nib" tamanho="4xl" @close="modalPadraoAberto = false">
-        <div class="p-2 lg:p-4 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-emerald-50/30 dark:bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/10">
-                <div>
-                    <AppSelect 
-                        v-model="padrao.tipoSaldo" 
-                        label="Modelo de Referência" 
-                        placeholder="Selecione o modelo..." 
-                        :opcoes="[{codigo: '0', descricao: 'Sem Saldo (Lista Simples)'}, {codigo: '1', descricao: 'Com Saldo (Cita Valores)'}]" 
-                        itemValue="codigo" 
-                        itemLabel="descricao"
-                        required 
-                        @change="carregarModeloPadrao"
-                    />
-                </div>
-                <div class="text-sm text-emerald-600 dark:text-emerald-400 flex items-start gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-emerald-500/20 shadow-sm">
-                    <Icon name="fa7-solid:info-circle" class="w-5 h-5 shrink-0 mt-0.5" />
-                    <p class="font-medium leading-relaxed">Este texto servirá como base automática ao cadastrar novos parâmetros para projetos.</p>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <Icon name="fa7-solid:tags" class="w-3 h-3 text-emerald-500" />
-                    Variáveis Dinâmicas (Clique para Copiar)
-                </label>
-                <div class="bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 text-[11px]">
-                    <div v-for="(variavel, idx) in variaveis" :key="idx" 
-                         @click="copiarVariavel(variavel.codigo)"
-                         class="group cursor-pointer bg-white dark:bg-[#1e2029] border border-gray-100 dark:border-gray-800 rounded-xl p-2.5 flex flex-col gap-1 hover:border-emerald-500 hover:shadow-md hover:shadow-emerald-500/5 transition-all">
-                        <code class="text-emerald-600 dark:text-emerald-400 font-bold font-mono tracking-tight group-hover:scale-105 transition-transform">{{ variavel.codigo }}</code>
-                        <span class="text-gray-500 dark:text-gray-400 font-medium truncate">{{ variavel.desc }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <Icon name="fa7-solid:align-left" class="w-3 h-3 text-emerald-500" />
-                    Conteúdo da Redação
-                </label>
-                <textarea 
-                    v-model="padrao.texto" 
-                    rows="12" 
-                    class="w-full bg-white dark:bg-[#1e2029] border border-gray-200 dark:border-gray-700/80 rounded-2xl p-6 text-sm text-gray-800 dark:text-gray-200 leading-relaxed shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-serif"
-                    placeholder="Inicie a redação do ofício padrão...">
-                </textarea>
-            </div>
+    <AppModalFiltroAvancado :aberto="modalFiltroAvancadoAberto" @close="modalFiltroAvancadoAberto = false"
+      @limpar="limparFiltrosAvancados" @aplicar="aplicarFiltroAvancado">
+        <div class="md:col-span-2">
+          <AppInputTexto v-model="filtro.projetoNome" label="NOME DO PROJETO" placeholder="Buscar por projeto..." icone="fa7-solid:magnifying-glass" />
         </div>
-
-        <template #footer>
-            <div class="flex gap-3 justify-end w-full">
-                <AppBotao variacao="padrao" @click="modalPadraoAberto = false" class="px-8">Cancelar</AppBotao>
-                <AppBotao variacao="primario" :carregando="salvandoPadrao" @click="gravarModeloPadrao" class="px-8">Gravar Redação</AppBotao>
-            </div>
-        </template>
-    </AppModal>
-
-    <!-- Modal Histórico -->
-    <AppModal :isOpen="modalHistoricoAberto" title="Histórico de Alterações" icon="fa7-solid:clock-rotate-left" tamanho="xl" @close="modalHistoricoAberto = false">
-      <div class="max-h-[500px] overflow-y-auto p-4 space-y-4">
-        <div v-for="hist in historicoData" :key="hist.codigo" class="bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
-          <div class="bg-white dark:bg-[#1e2029] px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
-                    <Icon name="fa7-solid:user-pen" class="w-4 h-4" />
-                </div>
-                <div>
-                    <h5 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">{{ hist.usuarioAlteracao }}</h5>
-                    <p class="text-[10px] text-gray-500 font-bold">{{ hist.dataAlteracao }}</p>
-                </div>
-            </div>
-          </div>
-          <div class="p-4 space-y-2">
-            <div v-for="(alt, idx) in hist.alteracoes" :key="idx" class="text-xs text-gray-700 dark:text-gray-300 bg-white/50 dark:bg-black/20 p-2 rounded-lg border border-gray-100/50 dark:border-gray-800/50" v-html="alt"></div>
-          </div>
+        <div class="md:col-span-2">
+          <AppSelect 
+            v-model="filtro.comSaldo" 
+            label="POSSUI SALDO?" 
+            placeholder="Selecione..."
+            :opcoes="[{codigo: '', descricao: 'Todos'}, {codigo: '1', descricao: 'Sim'}, {codigo: '0', descricao: 'Não'}]" 
+            itemValue="codigo" 
+            itemLabel="descricao" 
+          />
         </div>
-        <div v-if="historicoData.length === 0" class="py-12 text-center text-gray-400">
-            <Icon name="fa7-solid:folder-open" class="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <p class="text-xs font-black uppercase tracking-widest">Nenhum histórico encontrado</p>
-        </div>
-      </div>
-    </AppModal>
+    </AppModalFiltroAvancado>
+
+    <AppModalExibicao :aberto="modalExibicaoAberto" :colunas="colunasTemp" :labels="labels" @aplicar="aplicarExibicao"
+      @close="modalExibicaoAberto = false" />
+
+
+
+    <AppModalHistorico :aberto="modalHistoricoAberto" :historico="historicoData"
+      :carregando="carregandoHistorico" @close="modalHistoricoAberto = false" />
 
   </div>
 </template>
@@ -189,8 +135,9 @@
 <script setup lang="ts">
 const {
   carregando, buscaRealizada, visaoAtual, dados, filtro,
-  buscarLista, modalHistoricoAberto, historicoData, abrirHistorico,
-  modalPadraoAberto, salvandoPadrao, padrao, variaveis, carregarModeloPadrao, abrirModalPadrao, gravarModeloPadrao, copiarVariavel,
+  buscarLista, modalHistoricoAberto, historicoData, abrirHistorico, carregandoHistorico,
+  modalFiltroAvancadoAberto, abrirModalFiltroAvancado, limparFiltrosAvancados, aplicarFiltroAvancado,
+  modalExibicaoAberto, abrirModalExibicao, colunas, labels, aplicarExibicao, colunasTemp,
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useParametrosOficioListagem()

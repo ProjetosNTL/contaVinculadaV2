@@ -7,33 +7,23 @@
       :paginaAtual="ehEdicao ? 'Edição de Parâmetros' : 'Novo Parâmetro de Ofício'"
     />
 
-    <div class="mb-2">
-      <AppPassosFormulario 
-        :passos="['Vincular Projeto', 'Redigir Conteúdo']" 
-        :passoAtual="passoAtual - 1" 
-      />
-    </div>
-
     <AppCartaoFormulario>
       <AppSobreposicaoCarregamento :carregando="carregandoTela || salvando" :mensagem="salvando ? 'Gravando dados...' : 'Carregando informações...'" />
 
-      <form v-if="!carregandoTela" @submit.prevent="avancarPasso" class="space-y-12 relative z-0">
-        
-        <!-- PASSO 1: PROJETO -->
-        <div v-if="passoAtual === 1" class="animate-fade-in">
+      <form v-if="!carregandoTela" @submit.prevent="gravar" class="space-y-8 relative z-0">
             <AppFormularioSecao icone="fa7-solid:diagram-project">
                 Seleção do Projeto
             </AppFormularioSecao>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8 mt-6">
-                <div class="md:col-span-12 lg:col-span-8">
+                <div class="md:col-span-12 lg:col-span-8" :class="{ 'animate-shake': erros.has('projeto') }">
                     <AppSelect 
                         v-model="form.projeto" 
                         label="Projeto Correspondente" 
                         placeholder="Selecione o projeto na lista..." 
                         :opcoes="projetos" 
                         itemValue="codigo" 
-                        itemLabel="apelido" 
+                        itemLabel="nomeExibicao" 
                         required 
                         @change="buscarModeloPadrao"
                     />
@@ -46,22 +36,21 @@
                     </div>
                 </div>
             </div>
-        </div>
-
         <!-- PASSO 2: REDAÇÃO -->
-        <div v-if="passoAtual === 2" class="animate-fade-in">
-            <AppFormularioSecao icone="fa7-solid:align-left">
-                Redação do Ofício
-            </AppFormularioSecao>
+        <AppFormularioSecao icone="fa7-solid:align-left">
+            Redação do Ofício
+        </AppFormularioSecao>
 
-            <div class="mt-6 space-y-6">
+        <div class="mt-6 space-y-6">
+            <div :class="{ 'animate-shake': erros.has('texto') }">
                 <textarea 
                     v-model="form.texto" 
                     rows="15" 
-                    class="w-full bg-gray-50/50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl p-8 text-sm text-gray-800 dark:text-gray-200 leading-relaxed shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-serif"
+                    class="w-full textarea-scrollbar bg-gray-50/50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl p-8 text-sm text-gray-800 dark:text-gray-200 leading-relaxed shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-serif"
                     placeholder="Digite aqui o texto do ofício..."
                     required>
                 </textarea>
+            </div>
 
                 <!-- Dica Variaveis -->
                 <div class="bg-white dark:bg-[#1e2029] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
@@ -75,19 +64,14 @@
                         </code>
                     </div>
                 </div>
-            </div>
         </div>
 
         <AppRodapeFormulario 
           :editando="ehEdicao" 
           :carregandoGravar="salvando"
-          :labelVoltar="passoAtual === 1 ? 'Retornar' : 'Etapa Anterior'"
-          :labelGravar="passoAtual === totalPassos ? 'Finalizar Cadastro' : 'Próxima Etapa'"
-          :iconeGravar="passoAtual === totalPassos ? 'fa7-solid:check-double' : 'fa7-solid:arrow-right'"
-          @voltar="voltarPasso"
+          @voltar="voltar"
           @excluir="modalExclusaoAberto = true"
           @limpar="limpar"
-          @gravar="avancarPasso"
         />
       </form>
     </AppCartaoFormulario>
@@ -123,6 +107,34 @@
       </template>
     </AppModal>
 
+    <!-- Modal Alerta Erro -->
+    <AppModal 
+      :isOpen="modalAlertaAberto" 
+      :title="modalAlertaTitulo" 
+      icon="fa7-solid:circle-exclamation"
+      @close="fecharModalAlerta"
+    >
+      <div class="p-6 text-center">
+         <p class="text-base font-bold text-gray-700 dark:text-gray-200">{{ modalAlertaMensagem }}</p>
+      </div>
+      <template #footer>
+        <AppBotao variacao="primario" @click="fecharModalAlerta" class="w-full">Entendi</AppBotao>
+      </template>
+    </AppModal>
+
+    <!-- Modal Sucesso -->
+    <AppModal :isOpen="modalSucessoAberto" title="Sucesso" icon="fa7-solid:circle-check" semScroll @close="voltar">
+      <div class="flex flex-col items-center py-6 text-center">
+        <div class="relative mb-8">
+          <div class="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
+          <div class="relative w-24 h-24 bg-gradient-to-tr from-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-2xl"><Icon name="fa7-solid:check" class="w-12 h-12 text-white" /></div>
+        </div>
+        <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">Sucesso!</h3>
+        <p class="text-gray-500 dark:text-gray-400 text-lg mb-8">O parâmetro de ofício foi salvo.</p>
+      </div>
+      <template #footer><AppBotao variacao="primario" @click="voltar" class="w-full h-14 text-lg rounded-2xl">Voltar para Listagem</AppBotao></template>
+    </AppModal>
+
   </div>
 </template>
 
@@ -130,6 +142,41 @@
 const {
   carregandoTela, salvando, modalExclusaoAberto, form, projetos, ehEdicao, variaveis,
   carregarProjetos, carregarDados, buscarModeloPadrao, gravar, excluir, limpar, voltar,
-  passoAtual, totalPassos, avancarPasso, voltarPasso
+  erros, modalAlertaAberto, modalAlertaTitulo, modalAlertaMensagem, fecharModalAlerta, modalSucessoAberto
 } = useParametrosOficioFormulario()
 </script>
+
+<style scoped>
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-4px); }
+}
+.animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+.animate-shake :deep(input), .animate-shake :deep(select), .animate-shake :deep(textarea) { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+.dark .animate-shake :deep(input), .dark .animate-shake :deep(textarea), .dark .animate-shake :deep(select) { background-color: rgba(239, 68, 68, 0.05) !important; }
+
+/* Custom Scrollbar for the Textarea */
+.textarea-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.textarea-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 8px; /* Afasta o tracker do overflow top/bottom do padding p/ nao grudar nas bordas rounded-2xl */
+}
+.textarea-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 8px;
+  border: 2px solid transparent; 
+  background-clip: padding-box;
+}
+.dark .textarea-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border: 2px solid transparent; 
+  background-clip: padding-box;
+}
+.textarea-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #10b981;
+}
+</style>
