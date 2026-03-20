@@ -22,14 +22,14 @@
         <!-- PASSO 1: INFORMAÇÕES DO LANÇAMENTO -->
         <div v-if="passoAtual === 1" class="animate-fade-in">
           <AppFormularioSecao icone="fa7-solid:circle-info">
-            Informações Gerais do Lançamento
+            INFORMAÇÕES GERAIS DO LANÇAMENTO
           </AppFormularioSecao>
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8 mt-6">
             <div class="md:col-span-6">
               <AppSelect 
                 v-model="form.projeto" 
-                label="Projeto" 
+                label="PROJETO" 
                 placeholder="Selecione o projeto na lista..." 
                 :opcoes="projetosFormatados" 
                 itemValue="codigo" 
@@ -42,7 +42,7 @@
             <div class="md:col-span-6">
               <AppSelect 
                 v-model="form.contaVinculada" 
-                label="Conta Vinculada" 
+                label="CONTA VINCULADA" 
                 placeholder="Selecione a conta bancária..." 
                 :opcoes="contasVinculadas" 
                 itemValue="codigo" 
@@ -55,7 +55,7 @@
             <div class="md:col-span-4">
               <AppSelect 
                 v-model="form.tipoMovimentacao" 
-                label="Tipo da Movimentação" 
+                label="TIPO DA MOVIMENTAÇÃO" 
                 placeholder="Selecione o tipo..." 
                 :opcoes="tiposMovimentacao" 
                 itemValue="codigo" 
@@ -67,7 +67,7 @@
             <div class="md:col-span-3">
               <AppInputTexto 
                 v-model="form.valorMovimentacao" 
-                label="Valor da Movimentação" 
+                label="VALOR DA MOVIMENTAÇÃO" 
                 placeholder="0,00" 
                 icone="fa7-solid:dollar-sign"
                 required 
@@ -78,7 +78,7 @@
             <div class="md:col-span-2">
               <AppInputTexto 
                 v-model="form.dataMovimentacao" 
-                label="Data da Mov." 
+                label="DATA DA MOV." 
                 placeholder="dd/mm/aaaa" 
                 icone="fa7-solid:calendar-days"
                 required 
@@ -89,7 +89,7 @@
             <div class="md:col-span-3">
               <AppSelect 
                 v-model="form.classificacaoLancamento" 
-                label="Classificação do Lanc." 
+                label="CLASSIFICAÇÃO DO LANC." 
                 placeholder="Selecione..." 
                 :opcoes="classificacoes" 
                 itemValue="codigo" 
@@ -101,7 +101,7 @@
             <div class="md:col-span-12">
               <AppInputTexto 
                 v-model="form.motivo" 
-                label="Motivo / Justificativa" 
+                label="MOTIVO / JUSTIFICATIVA" 
                 placeholder="Descreva o motivo deste lançamento detalhadamente..." 
                 icone="fa7-solid:comment-dots"
                 textarea
@@ -115,14 +115,14 @@
         <!-- PASSO 2: INFORMAÇÕES DO OFÍCIO -->
         <div v-if="passoAtual === 2" class="animate-fade-in">
           <AppFormularioSecao icone="fa7-solid:stamp">
-            Informações do Ofício de Reembolso
+            INFORMAÇÕES DO OFÍCIO DE REEMBOLSO
           </AppFormularioSecao>
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-8 mt-6">
             <div class="md:col-span-3">
               <AppInputTexto 
                 v-model="form.numeroOficio" 
-                label="Nº do Ofício" 
+                label="Nº DO OFÍCIO" 
                 placeholder="Digite o número..." 
                 icone="fa7-solid:hashtag"
                 required 
@@ -132,7 +132,7 @@
             <div class="md:col-span-3">
               <AppInputTexto 
                 v-model="form.dataOficio" 
-                label="Data do Ofício" 
+                label="DATA DO OFÍCIO" 
                 placeholder="dd/mm/aaaa" 
                 icone="fa7-solid:calendar-check"
                 required 
@@ -143,7 +143,7 @@
             <div class="md:col-span-3">
               <AppInputTexto 
                 v-model="form.valorOficio" 
-                label="Valor do Ofício" 
+                label="VALOR DO OFÍCIO" 
                 placeholder="0,00" 
                 icone="fa7-solid:dollar-sign"
                 required 
@@ -154,7 +154,7 @@
             <div class="md:col-span-3">
               <AppSelect 
                 v-model="form.status" 
-                label="Status Atual" 
+                label="STATUS ATUAL" 
                 placeholder="Selecione o status..." 
                 :opcoes="statusList" 
                 itemValue="codigo" 
@@ -166,7 +166,7 @@
             <div class="md:col-span-3">
               <AppInputTexto 
                 v-model="form.dataResposta" 
-                label="Data da Resposta" 
+                label="DATA DA RESPOSTA" 
                 placeholder="dd/mm/aaaa" 
                 icone="fa7-solid:calendar-minus"
                 required 
@@ -177,7 +177,7 @@
             <div class="md:col-span-3">
               <AppInputTexto 
                 v-model="form.dataEntrada" 
-                label="Data de Entrada" 
+                label="DATA DE ENTRADA" 
                 placeholder="dd/mm/aaaa" 
                 icone="fa7-solid:calendar-plus"
                 required 
@@ -188,7 +188,7 @@
             <div class="md:col-span-6">
                 <AppSelect 
                   v-model="form.classificacaoOficio" 
-                  label="Classificação do Ofício" 
+                  label="CLASSIFICAÇÃO DO OFÍCIO" 
                   placeholder="Selecione a classificação..." 
                   :opcoes="classificacoes" 
                   itemValue="codigo" 
@@ -202,7 +202,7 @@
         <!-- PASSO 3: FUNCIONÁRIOS -->
         <div v-if="passoAtual === 3" class="animate-fade-in">
           <AppFormularioSecao icone="fa7-solid:users-rectangle">
-            Aplicação em Funcionários (Opcional)
+            APLICAÇÃO EM FUNCIONÁRIOS (OPCIONAL)
           </AppFormularioSecao>
           
           <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest mt-2 mb-6 flex items-center gap-2">
@@ -214,7 +214,7 @@
             <div class="md:col-span-8">
               <AppSelect 
                 v-model="funcionarioTemp" 
-                label="Selecione o Funcionário" 
+                label="SELECIONE O FUNCIONÁRIO" 
                 placeholder="Busque pelo nome..." 
                 :opcoes="funcionariosAtivos" 
                 itemValue="codigo" 
@@ -229,25 +229,25 @@
           </div>
 
           <div class="mt-8 overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm bg-gray-50/50 dark:bg-gray-900/10">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left border-collapse font-bold uppercase tracking-widest text-[10px]">
               <thead>
                 <tr class="bg-white dark:bg-[#1e2029]">
                   <th class="p-4 w-12 text-center"></th>
-                  <th class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Nome do Funcionário</th>
+                  <th class="p-4 text-gray-400">Nome do Funcionário</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(item, index) in form.funcionarios.filter(f => f.tipoAlteracao !== 2)" :key="index" 
                     class="border-t border-gray-100 dark:border-gray-800 hover:bg-white dark:hover:bg-[#1e2029] transition-colors group">
                   <td class="p-4 text-center">
-                    <input type="checkbox" v-model="item.selecionadoParaRemover" class="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer" />
+                    <AppCheckbox v-model="item.selecionadoParaRemover" />
                   </td>
                   <td class="p-4">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 font-extrabold text-[10px]">
                             {{ item.funcionarioNome.charAt(0).toUpperCase() }}
                         </div>
-                        <span class="text-sm font-bold text-gray-700 dark:text-gray-300">{{ item.funcionarioNome }}</span>
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ item.funcionarioNome }}</span>
                     </div>
                   </td>
                 </tr>

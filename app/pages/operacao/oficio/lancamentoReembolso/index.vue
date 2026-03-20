@@ -8,13 +8,13 @@
       icone="fa7-solid:file-invoice-dollar" 
     />
 
-    <AppBarraFerramentas v-model:visao-atual="visaoAtual" mostrar-relatorio @excel="gerarExcel" @pdf="gerarPdf">
+    <AppBarraFerramentas v-model:visao-atual="visaoAtual">
       <template #entradas>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end w-full">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-end flex-1">
           <div class="md:col-span-5">
             <AppSelect 
               v-model="filtro.projeto" 
-              label="Projeto" 
+              label="PROJETO" 
               placeholder="Todos os Projetos"
               :opcoes="projetos" 
               itemValue="codigo" 
@@ -24,7 +24,7 @@
           <div class="md:col-span-4">
             <AppSelect 
               v-model="filtro.tipoMovimentacao" 
-              label="Tipo Movimentação" 
+              label="TIPO MOVIMENTAÇÃO" 
               placeholder="Todas"
               :opcoes="tiposMovimentacao" 
               itemValue="codigo" 
@@ -34,7 +34,7 @@
           <div class="md:col-span-3">
               <AppInputTexto 
                   v-model="filtro.dataMovimentacao" 
-                  label="Data Mov." 
+                  label="DATA MOV." 
                   placeholder="dd/mm/aaaa"
                   icone="fa7-solid:calendar-days"
                   v-maska="'##/##/####'"
@@ -48,14 +48,19 @@
       </template>
 
       <template #acoes-principais>
-        <AppBotao variacao="acao" icone="fa7-solid:file-circle-plus" @click="novoRegistro">
-          Novo Lançamento
-        </AppBotao>
+        <div class="flex items-center gap-3">
+          <AppBotao variacao="acao" icone="fa7-solid:file-circle-plus" @click="novoRegistro">
+            Novo Lançamento
+          </AppBotao>
+          <AppBotao variacao="acao" icone="fa7-solid:file-excel" @click="gerarExcel">
+            Relatório
+          </AppBotao>
+        </div>
       </template>
 
       <template #acoes-pesquisa>
         <AppBotao variacao="acao" icone="fa7-solid:magnifying-glass" @click="buscarLista">
-          Pesquisar Lançamentos
+          Pesquisar
         </AppBotao>
       </template>
     </AppBarraFerramentas>
@@ -76,46 +81,62 @@
       @mudarItensPorPagina="mudarItensPorPagina"
     >
       <template #cabecalho-tabela>
-        <th v-if="colunas.projeto" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Projeto</th>
-        <th v-if="colunas.contaVinculada" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Conta Vinculada</th>
-        <th v-if="colunas.tipoMov" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Tipo Mov.</th>
-        <th v-if="colunas.vlrMov" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Vlr Mov.</th>
-        <th v-if="colunas.dataOficio" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Data Ofício</th>
-        <th v-if="colunas.status" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
-        <th v-if="colunas.acoes" class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Ações</th>
+        <th v-if="colunas.projeto" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Projeto</th>
+        <th v-if="colunas.contaVinculada" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Conta Vinculada</th>
+        <th v-if="colunas.tipoMov" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tipo Mov.</th>
+        <th v-if="colunas.vlrMov" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Vlr Mov.</th>
+        <th v-if="colunas.dataOficio" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Data Ofício</th>
+        <th v-if="colunas.status" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
+        <th v-if="colunas.acoes" class="p-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Ações</th>
       </template>
 
       <template #linhas-tabela="{ item }">
-        <td v-if="colunas.projeto" class="px-6 py-4 font-bold text-sm text-gray-900 dark:text-gray-100">{{ item.projeto }}</td>
-        <td v-if="colunas.contaVinculada" class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ item.contaVinculada }}</td>
-        <td v-if="colunas.tipoMov" class="px-6 py-4 text-center">
-            <span class="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-lg font-bold">{{ item.tipoMovimentacao }}</span>
+        <td v-if="colunas.projeto" class="p-4">
+          <NuxtLink :to="`/operacao/oficio/lancamentoReembolso/cadastro?id=${item.codigo}`" class="font-bold text-sm text-gray-800 dark:text-gray-200 hover:text-emerald-500 transition-colors uppercase">
+            {{ item.projeto }}
+          </NuxtLink>
         </td>
-        <td v-if="colunas.vlrMov" class="px-6 py-4 text-center font-bold text-blue-600 dark:text-blue-400">R$ {{ item.valorMovimentacao }}</td>
-        <td v-if="colunas.dataOficio" class="px-6 py-4 text-center text-sm">{{ item.dataOficio }}</td>
-        <td v-if="colunas.status" class="px-6 py-4 text-center">
-          <span :class="item.status === 'Aprovado' || item.status === 'Liquidado' ? 'text-green-600 bg-green-50 border-green-200' : 'text-amber-600 bg-amber-50 border-amber-200'" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border">
+        <td v-if="colunas.contaVinculada" class="p-4 text-sm font-medium text-gray-500 dark:text-gray-400 italic">
+          {{ item.contaVinculada }}
+        </td>
+        <td v-if="colunas.tipoMov" class="p-4 text-center">
+            <span class="text-[10px] bg-gray-100 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider border border-gray-200 dark:border-gray-700">
+              {{ item.tipoMovimentacao }}
+            </span>
+        </td>
+        <td v-if="colunas.vlrMov" class="p-4 text-center font-black text-emerald-600 dark:text-emerald-400 text-sm">
+          R$ {{ item.valorMovimentacao }}
+        </td>
+        <td v-if="colunas.dataOficio" class="p-4 text-center text-xs font-bold text-gray-500">
+          {{ item.dataOficio }}
+        </td>
+        <td v-if="colunas.status" class="p-4 text-center">
+          <span :class="item.status === 'Aprovado' || item.status === 'Liquidado' ? 'text-green-600 bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/20' : 'text-amber-600 bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20'" class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border">
             {{ item.status }}
           </span>
         </td>
-        <td v-if="colunas.acoes" class="px-6 py-4 text-center">
-          <div class="flex items-center justify-center gap-2">
+        <td v-if="colunas.acoes" class="p-4 text-center">
+          <div class="flex items-center justify-center gap-1.5">
             <button @click="abrirModalFuncionarios(item.codigo)" 
-              :class="item.funcionario === 1 ? 'text-blue-500 hover:bg-blue-50' : 'text-gray-400 opacity-50 cursor-not-allowed'" 
+              :class="item.funcionario === 1 ? 'text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10' : 'text-gray-300 opacity-40 cursor-not-allowed'" 
               class="p-2 rounded-xl transition-all" title="Funcionários">
-              <Icon name="fa7-solid:users" class="w-5 h-5" />
+              <Icon name="fa7-solid:users" class="w-4 h-4" />
             </button>
             <button @click="abrirModalDetalhes(item.codigo)" 
               class="p-2 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Ver Detalhes">
-              <Icon name="fa7-solid:circle-info" class="w-5 h-5" />
+              <Icon name="fa7-solid:circle-info" class="w-4 h-4" />
             </button>
             <button @click="gerarPdfOficio(item.codigo)" 
               class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all" title="PDF Ofício">
-              <Icon name="fa7-solid:file-pdf" class="w-5 h-5" />
+              <Icon name="fa7-solid:file-pdf" class="w-4 h-4" />
+            </button>
+            <button @click="verHistorico" 
+              class="p-2 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-all" title="Histórico">
+              <Icon name="fa6-solid:history" class="w-4 h-4" />
             </button>
             <NuxtLink :to="`/operacao/oficio/lancamentoReembolso/cadastro?id=${item.codigo}`"
               class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-all" title="Editar">
-              <Icon name="fa7-solid:pen-to-square" class="w-5 h-5" />
+              <Icon name="fa7-solid:pen-to-square" class="w-4 h-4" />
             </NuxtLink>
           </div>
         </td>
@@ -216,6 +237,10 @@ const {
   registroInicial, registroFinal, totalRegistros, itensPorPagina, totalPaginas, paginaAtual, paginasExibidas,
   mudarPagina, mudarItensPorPagina
 } = useLancamentoReembolsoListagem()
+
+const verHistorico = () => {
+    alert('📜 Ver Histórico...')
+}
 
 const gerarExcel = () => {
     alert('📊 Gerando relatório de reembolsos (Excel)...')
