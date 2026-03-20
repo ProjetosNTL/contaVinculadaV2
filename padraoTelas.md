@@ -1,6 +1,6 @@
 # Guia de Padronização "Ouro" - Sistema ContaVinculada
 
-Este documento é a referência definitiva para a criação de novas telas no sistema. Ele define a arquitetura, os padrões visuais e as regras de negócio que garantem a consistência e a qualidade premium da experiência do usuário.
+Este documento é a referência arquitetural definitiva para a criação de TUDO no sistema. Ele documenta não apenas as lógicas visuais, mas **os blueprints exatos dos Composables e manipulação de estado**. **Toda IA ou humano deve seguir este manual rigorosamente, copiando as estruturas detalhadas aqui ao invés de codificar soluções nativas Vue/Nuxt**.
 
 > [!IMPORTANT]
 > Os módulos de **Funcionário** (`app/pages/cadastro/funcionario/`) e **Projeto** (`app/pages/cadastro/projeto/`) são os **Padrões Ouro**. 
@@ -9,129 +9,110 @@ Este documento é a referência definitiva para a criação de novas telas no si
 
 ---
 
-## 0. Regras de Ouro (Invioláveis)
+## 0. Regras de Ouro (Invioláveis e Restritas)
 
-1. **Referência Absoluta**: Se o cadastro for simples, siga **Funcionário**. Se for complexo (muitos campos), siga **Projeto**.
-2. **Navegação Distinta**: 
-   - Telas de **Listagem** (`index.vue`): **NÃO** usam barra de navegação no topo. Usam apenas `AppCabecalhoPagina`.
-   - Telas de **Cadastro** (`cadastro.vue`): **OBRIGATÓRIO** o uso de `AppBarraNavegacao` (Simples) ou `AppTrilhaNavegacao` (Complexo/Processos) no topo.
-3. **Barra de Ferramentas Obrigatória**: Em listagens, use `AppBarraFerramentas`. 
-   - `#acoes-principais` (Esquerda): Botões de "Novo" e "Relatórios".
-   - `#acoes-pesquisa` (Direita): Botão "Pesquisar".
-4. **Regra de Busca Ativa (Zero Auto-Load)**: Listagens começam vazias. Só carregam dados após interação explícita do usuário (pesquisa ou seleção no autocomplete).
-5. **Grid System**: Use `md:grid-cols-12` com `gap-x-6 gap-y-8`. Alinhamento vertical é crucial.
-6. **Inativação Lógica**: Nunca "Excluir". Sempre "Inativar". Use `AppModal` (tamanho `sm`) para confirmação.
+1. **Separação Estrita View/Controller**: O `.vue` é **estritamente View**. Todas as propriedades reativas de form, variáveis de *loading*, *modais de alerta* e funções async/fetch devem ser injetadas a partir de um `use[Modulo]Formulario` ou `use[Modulo]Listagem`. Nenhum fetch avulso no vue.
+2. **Zero Auto-Load Funcional**: Listagens começam vazias. A chamada de API para buscar lista só ocorre no clique de "Pesquisar" ou submissão de filtro explícita pelo usuário.
+3. **Data Fetching Assíncrono Restrito**: Nunca use `useFetch` ou `useAsyncData` (isomórficos) para persistência e listagens. Use **SEMPRE o `$fetch` manual dentro de blocos `try/catch/finally`** manipulando *flags* de loading (ex: `carregandoTela.value = true`).
+4. **Navegação Distinta**: 
+   - **Listagens (`index.vue`)**: Sem barra de navegação no topo. Usam apenas `AppCabecalhoPagina`.
+   - **Cadastros (`cadastro.vue`)**: Uso OBRIGATÓRIO de `AppBarraNavegacao` (Simples) ou `AppTrilhaNavegacao` (Complexos) no topo.
+5. **Inativação Lógica**: Nunca crie fluxos de "Delete" físico. Sempre "Inativar" o registro (`ativo = 0` ou `false`).
+6. **Theme CSS & Layout**: Tudo requer suporte via classes `dark:`. Formulários usam sempre matriz em Grid responsiva (`grid grid-cols-1 md:grid-cols-12 gap-6 items-end`). A tela principal (View root) deve iniciar com `<div class="min-h-full flex flex-col gap-6 p-4 md:p-8 animate-fade-in text-gray-900 dark:text-gray-100">`.
 
 ---
 
-## 1. Arquitetura de Telas (Frontend)
+## 1. Blueprint da Camada de View (O Arquivo `.vue`)
 
-### 1.1 Listagem (`index.vue`)
-Use o composable `use...Listagem.ts` para gerenciar o estado.
-- **Cabeçalho**: `AppCabecalhoPagina`.
-- **Filtros**: `AppInputAutocomplete` para busca rápida + `AppSelecaoStatus`.
-- **Modais**: `AppModalExibicao` (colunas dinâmicas), `AppModalFiltroAvancado` e `AppModalHistorico`.
-- **Visão**: Alternância entre Tabela e Cards via `AppContainerListagem`.
+### 1.1 View de Listagem (`index.vue`)
+Use a trindade nativa do sistema:
+1. `AppCabecalhoPagina` (exclusivo p/ lists).
+2. `AppBarraFerramentas` (Pesquisa lateral esquerda/direita contendo filtros rápidos, ex: `AppInputAutocomplete` e `AppSelecaoStatus`).
+3. `AppContainerListagem` (com slots responsivos).
+   - Extraia a reatividade de `use[A]Listagem()` com *destructuring*. O container exige mapeamento rígido: `:lista="listaRegistros"`, `:paginaAtual="paginaAtual"`, etc.
+   - Use `#cabecalho-tabela` e `#linhas-tabela`. Condicionais atadas via `v-if="colunasVisiveis.nomeColuna"`.
 
-### 1.2 Cadastro Simples (`funcionario/cadastro.vue`)
-Ideal para formulários que cabem em uma única visualização sem cansar o usuário.
-- **Estrutura**: `AppBarraNavegacao` -> `AppCartaoFormulario` -> `AppFormularioSecao` -> `AppRodapeFormulario`.
-- **Lógica**: Carregamento direto dos dados no `onMounted` via composable.
+### 1.2 View de Cadastro Simples vs Multi-Etapas
+- **Simples (`funcionario/cadastro.vue`)**: Ideal para fluxos curtos. Usa `AppBarraNavegacao` -> `AppCartaoFormulario` -> `AppSobreposicaoCarregamento` -> `<form @submit.prevent="gravarRegistro">` -> `AppFormularioSecao` -> `<AppRodapeFormulario>`.
+- **Complexo (`projeto/cadastro.vue`)**: Quando o volume de campos exige carga cognitiva dividida. Usa `AppTrilhaNavegacao` e o componente chave `AppPassosFormulario`. A submissão bloqueia avanço: `<form @submit.prevent="passoAtual === x ? gravarRegistro() : avancarPasso()">`.
 
-### 1.3 Cadastro Multi-Etapas (`projeto/cadastro.vue`)
-**Por que utilizar?** Quando o volume de informações é alto (ex: Projetos tem Dados Gerais, Endereço e Parâmetros). Dividir em passos reduz a carga cognitiva e melhora a UX.
-- **Componente Chave**: `AppPassosFormulario`.
-- **Navegação**: `AppTrilhaNavegacao` (mais robusta que a barra simples).
-- **UX Etapas**: 
-  - **Validação Local**: Validar cada etapa antes de avançar (`avancarPasso`).
-  - **Feedback Visual**: Usar a classe `animate-shake` em campos obrigatórios vazios.
-  - **Resumo Final**: Exibir um `AppModal` de sucesso com o resumo dos dados salvos.
-
----
-
-## 2. Camada de Lógica (Composables)
-
-Os composables devem ser separados em arquivos distintos dentro de `app/composables/cadastro/[modulo]/`.
-
-### 2.1 Padrão `use...Listagem.ts`
-Deve retornar:
-- `filtro`: Objeto reativo com os parâmetros de busca.
-- `listaRegistros`: Array com os dados retornados da API.
-- `colunasVisiveis`: Objeto para controle de visibilidade na tabela.
-- `buscar...()`: Função que chama o endpoint `/api/.../listagem`.
-- `abrirHistorico()`: Carrega logs de alteração do registro.
-
-### 2.2 Padrão `use...Formulario.ts`
-Deve gerenciar:
-- `form`: Objeto `reactive` seguindo uma `interface` TypeScript rigorosa.
-- `passoAtual` (se multi-etapas): Controla qual div do formulário exibir.
-- `validarEtapa()`: Retorna boolean e popula o `Set` de `erros` (que dispara a animação `animate-shake`).
-- `gravarRegistro()`: Faz o POST para `/api/.../gravar`.
-- `excluirRegistro()`: Faz o POST para `/api/.../excluir` (inativação).
-- **Sucesso**: Exibir o modal de resumo com `modalSucessoAberto`.
+### 1.3 Validação Visual "Shake"
+- Os campos nunca são nativos HTML. Use `AppInputTexto`, `AppInputCnpj`, `AppSelect`, etc.
+- **Implementação Visual de Erro**: O framework exige tremulação e highlights automáticos vermelhos nos erros do form:
+```vue
+<div :class="{ 'animate-shake': erros.has('cnpj') }">
+   <AppInputCnpj v-model="form.cnpj" required />
+</div>
+```
 
 ---
 
-## 3. Camada de Servidor (API e DB)
+## 2. Componentes de Interface UI/UX Padrões do Sistema
 
-### 3.1 Estrutura de Endpoints e Coleções XML
-Localizados em `server/api/cadastro/[modulo]/`:
-1. `listagem.post.ts`: Recebe filtros e retorna array de objetos. Deve usar `comum.formatarCpf` e `comum.abreviarNome` se necessário.
-2. `recupera.get.ts`: Recebe um ID/Código e retorna o objeto completo para edição.
-3. `gravar.post.ts`: 
-   - Recebe o `form` completo. 
-   - **Coleções (Grids)**: Se o formulário tiver listas (ex: `contas` ou `verbas`), converta-as para **XML** antes de enviar para o banco de dados via query EXEC.
-   - Chama a **Procedures SQL**.
-4. `excluir.post.ts`: Altera o campo `ativo` para `0`.
-5. `autocomplete.get.ts`: Retorna sugestões leves (id/nome) para o `AppInputAutocomplete`.
-
-### 3.2 Utilitários (`server/utils/comum.ts`)
-**Sempre** utilize estas funções para manter a integridade:
-- `comum.validaCPF` / `comum.validaCNPJ`.
-- `comum.formatarDataSql`: Converte DD/MM/YYYY para YYYY-MM-DD.
-- `comum.validaValorRecupera`: Converte números do banco para String "0,00".
+| Componente | Contexto Ouro e Uso Obrigatório |
+| :--- | :--- |
+| `AppInputAutocomplete` | Busca principal no header de telas de Listagem. |
+| `AppInputCpf` / `Cnpj` / `Cep` | Inputs mascarados e validados por regras de negócio nativas. |
+| `AppSelect` | Listas de seleção (Sempre passe props `itemValue="codigo"` e `itemLabel="descricao"`). |
+| `AppBotao` | Use variações engessadas: `acao` (azul), `primario` (verde/gravar), `perigo` (vermelho/inativar). |
+| `AppSobreposicaoCarregamento` | Layer de opacidade durante qualquer `$fetch` crítico p/ a UI que renderiza dados lidos. |
+| `AppAtivo` | Exibe pills do sistema com o status "Ativo/Inativo" usando cores padronizadas. |
 
 ---
 
-## 4. Componentes de Interface (UI/UX)
+## 3. Blueprint Rigoroso dos Composables
 
-| Componente | Uso Obrigatório | Contexto |
+A lógica vital reside aqui (`app/composables/cadastro/[modulo]/...`). Estas variáveis DEVERÃO existir.
+
+### 3.1 Composable de Listagem (`use...Listagem.ts`)
+- **Paginação Global via Função Auxiliar**: Nunca escreva paginação lógica manual. Utilize **`usePaginacaoFrontEnd(listaCompleta, visaoAtual)`**. Você mapeia o `$fetch` na API para `listaCompleta.value = apiData` e o composable gerenciará e retornará `listaPaginada`, `paginaAtual`, etc.
+- **Debounce de Autocomplete**: Sugestões exigem length > 2 e `setTimeout()` para evitar spam de Requests.
+- **Modais Avançados (Booleans)**: Controles nativos como `modalFiltroAvancadoAberto`, `modalExibicaoAberto` e a property `colunasVisiveis`.
+
+### 3.2 Composable de Formulário (`use...Formulario.ts`)
+1. **Identificadores Iniciais**: Resgate via `const registroId = useRoute().query.id as string`.
+2. **Interface TS Forte**: Defina tipos rígidos, ex: `interface ModuloForm { codigo: string | number, ... }`.
+3. **Reatividade e Edição**:
+   - `const form = reactive<ModuloForm>({ codigo: registroId || '0', ... })`
+   - `const editando = computed(() => form.codigo !== '0' && !!form.codigo)`
+4. **Tratamento de Erros via `Set`**: `const erros = reactive(new Set<string>())`. Função manual `validarEtapa()` atualiza este Set para disparar o `animate-shake`.
+5. **Modais Seguros**: Nunca acesse o nativo `alert()`. Invoque métodos abstratos como `mostrarAlerta(titulo, msg)`, que abrirão o `AppModal` usando prop de erro `icon="fa7-solid:circle-exclamation"`.
+6. **Integração CRUD**: Funções `carregarDados()`, `gravarRegistro()` e `excluirRegistro()` manipulando métodos `$fetch({ method: 'POST', body: form })` dentro de `try/catch/finally` acompanhados das flags estritas `carregandoTela`, `carregandoGravacao`, `carregandoExclusao`.
+
+---
+
+## 4. Camada de Servidor Backend (API em `/server/api/`)
+
+A via de comunicação final usa endpoints Nuxt:
+1. `listagem.post.ts`: Extraia filtros e devolva a query no limite necessário.
+2. `recupera.get.ts`: Retorna JSON puro do registro (`?codigo=x`).
+3. `gravar.post.ts`: Recebe `form`. **Obrigatório**: Se submeter Listas filhas/Grids (ex: `verbas`), converta os Arrays do JS para um XML raw (ex: `<row id="X" />`) antes de despachar via `EXEC SP_` do SQL Server.
+4. `excluir.post.ts`: Procedimento de Inativar (`update set ativo = 0`).
+5. `autocomplete.get.ts`: Fast fetch com propriedades enxutas para combos visuais (ID, Apelido).
+
+### 4.1 Utilitários Universais (`server/utils/comum.ts`)
+Qualquer conversão de entrada de Form para formato do BD:
+- Máscaras: `comum.validaCPF`, `comum.validaCNPJ`.
+- Datas: `comum.formatarDataSql` converte DD/MM/YYYY p/ `YYYY-MM-DD`.
+- Valores Monetários: `comum.validaValorRecupera` devolve valores do server em String formatada.
+
+---
+
+## 5. Diferença entre Formulário Simples vs Complexo (O "Porquê")
+
+| Característica | Padrão Simples (Ex: Funcionário) | Padrão Complexo (Ex: Projeto) |
 | :--- | :--- | :--- |
-| `AppInputAutocomplete` | Sim | Busca principal da listagem. |
-| `AppInputCpf` / `AppInputCnpj` | Sim | Validação automática de máscara e dígito. |
-| `AppSelect` | Sim | Listas de seleção (use `itemValue="codigo"` e `itemLabel="descricao"`). |
-| `AppBotao` | Sim | Use as variações: `acao` (azul/sistema), `primario` (verde/gravar), `perigo` (vermelho/inativar). |
-| `AppSobreposicaoCarregamento` | Sim | feedback visual durante qualquer requisição `fetch`. |
-| `AppAtivo` | Sim | Exibe o status "Ativo/Inativo" com cores padronizadas. |
+| **Passos** | Não possui (`AppPassosFormulario`). Fica tudo em tela única. | Possui 3 passos ou mais dividindo o formulário. |
+| **Design Intent** | Foco primário na Velocidade. Público mais Operacional. | Foco primário na Carga Cognitiva. Quebra blocos de contrato vs financeiro. |
+| **Arquitetura** | Usa apenas Header padrão e um botão Salvar ao final. | Valida a etapa (erros.has) ANTES de autorizar "Avançar". |
 
 ---
 
-## 5. Fluxo de Implementação (Passo a Passo)
+## 6. Fluxo de Implementação I.A. (Passo a Passo)
 
-Para criar uma nova tela sem erros:
-
-1. **Defina o Tipo**: Simples (Etapa única) ou Complexo (Multi-passos).
-2. **Crie o Back-end**: Endpoints de listagem, recupera, gravar e excluir. Use sempre Procedures SQL.
-3. **Desenvolva o Composable**:
-   - Defina a `interface` do formulário.
-   - Implemente as funções de busca e persistência.
-   - Para multi-etapas, crie a lógica de `passoAtual` e o `Set` de `erros`.
-4. **Construa a View**:
-   - Use os componentes `App...` conforme a tabela acima.
-   - Garanta que todos os botões no `AppRodapeFormulario` estejam vinculados corretamente.
-   - Adicione animações (`animate-fade-in` no container, `animate-shake` nos erros).
-5. **Verifique o "Zero Auto-Load"**: Garanta que o `onMounted` da listagem não dispare busca sem filtros.
-
----
-
-## 6. Diferença entre Funcionários e Projetos (O "Porquê")
-
-| Característica | Funcionário (Simples) | Projeto (Complexo) |
-| :--- | :--- | :--- |
-| **Passos** | Não possui (`AppPassosFormulario`). | Possui 3 passos. |
-| **Público** | Operacional (Cadastro rápido). | Gestão (Cadastro detalhado/contratual). |
-| **Campos** | ~6 campos fundamentais. | >20 campos, incluindo endereços e verbas. |
-| **UX Strategy** | Foco em velocidade. | Foco em organização e precisão de dados. |
-
-> [!TIP]
-> Use o `AppPassosFormulario` sempre que o formulário exigir que o usuário mude o "contexto mental" (ex: trocar de dados pessoais para dados bancários ou endereços).
+Para criar uma nova base para uma tela:
+1. **Verifique a Complexidade**: Defina o Tipo (única fase ou steps).
+2. **Criar Server APIs**: Gere as bases (`listagem, recupera, gravar, excluir`); use utils de SQL se possível.
+3. **Criar Blueprint dos Composables**: Prepare a Interface `IModulo`, o hook `usePaginacaoFrontEnd` e injete os loads de botões e alertas customizados.
+4. **Construir a Interface (.vue)**: Copie os templates Grid Tailwind e conecte cada `<AppInput*>` com suas respectivas variáveis reativas e validações (`animate-shake`) e `<AppModal>` informativos/sucesso.
+5. **Blindagem final**: Execute auditoria do "Zero Auto-Load".
